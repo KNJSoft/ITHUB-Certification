@@ -1,0 +1,150 @@
+import React, { useEffect, useState } from 'react';
+import { adminService } from '../../api/services';
+import { Users, Award, TrendingUp, BarChart3, Zap, ChevronRight, UserPlus } from 'lucide-react';
+import { motion } from 'motion/react';
+import { cn } from '../../lib/utils';
+
+export const AdminDashboard: React.FC = () => {
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const data = await adminService.getStats();
+        setStats(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  if (loading) return (
+     <div className="flex items-center justify-center h-[60vh]">
+        <div className="w-12 h-12 border-4 border-[#7c3aed] border-t-transparent rounded-full animate-spin" />
+      </div>
+  );
+
+  const statCards = [
+    { 
+      label: 'Total Inscrits', 
+      value: '1,284', 
+      change: '+12%', 
+      icon: Users, 
+      color: 'bg-blue-500', 
+      trend: 'up' 
+    },
+    { 
+      label: 'Utilisateurs Certifiés', 
+      value: stats.totalCertified, 
+      change: '+5%', 
+      icon: Award, 
+      color: 'bg-emerald-500', 
+      trend: 'up' 
+    },
+    { 
+      label: 'Tentatives Quiz', 
+      value: stats.totalAttempts, 
+      change: '+18%', 
+      icon: Zap, 
+      color: 'bg-[#7c3aed]', 
+      trend: 'up' 
+    },
+    { 
+      label: 'Taux de Réussite', 
+      value: `${stats.passRate}%`, 
+      change: '-2%', 
+      icon: TrendingUp, 
+      color: 'bg-amber-500', 
+      trend: 'down' 
+    },
+  ];
+
+  return (
+    <div className="space-y-12">
+      <header className="flex flex-col gap-2">
+        <div className="flex items-center gap-3">
+           <BarChart3 className="text-[#7c3aed]" size={32} />
+           <h1 className="text-4xl font-black tracking-tight text-white uppercase">Vue d'ensemble</h1>
+        </div>
+        <p className="text-[#64748b] font-medium tracking-wide">Performances globales de la plateforme de certification.</p>
+      </header>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {statCards.map((stat, index) => (
+          <motion.div
+            key={stat.label}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: index * 0.1 }}
+            className="bg-[#0a0f1d] border border-[#7c3aed20] p-8 rounded-[2rem] hover:border-[#7c3aed50] transition-colors group relative overflow-hidden"
+          >
+            <div className={`absolute top-0 right-0 w-32 h-32 ${stat.color} opacity-5 blur-[80px] -mr-16 -mt-16`} />
+            
+            <div className="flex items-center justify-between mb-6">
+              <div className={cn("p-4 rounded-2xl shadow-lg", stat.color)}>
+                <stat.icon size={24} className="text-white" />
+              </div>
+              <div className={cn(
+                "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border",
+                stat.trend === 'up' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-red-500/10 text-red-500 border-red-500/20"
+              )}>
+                {stat.change}
+              </div>
+            </div>
+
+            <p className="text-[#64748b] text-[10px] uppercase font-black tracking-[0.2em] mb-1">{stat.label}</p>
+            <h3 className="text-4xl font-black text-white tracking-tighter">{stat.value}</h3>
+          </motion.div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <div className="xl:col-span-2 bg-[#0a0f1d] border border-[#7c3aed10] rounded-[2.5rem] p-10">
+          <div className="flex items-center justify-between mb-10">
+            <div>
+              <h2 className="text-2xl font-black text-white tracking-tight uppercase">Activité Récente</h2>
+              <p className="text-xs text-[#64748b] font-medium mt-1">Dernières certifications obtenues par les élèves.</p>
+            </div>
+            <button className="text-[10px] font-black text-[#7c3aed] uppercase tracking-widest hover:underline px-4 py-2 bg-[#7c3aed10] rounded-full">
+              Mapper tout
+            </button>
+          </div>
+          
+          <div className="space-y-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="flex items-center justify-between p-5 rounded-3xl bg-[#0f172a50] border border-[#7c3aed05] hover:border-[#7c3aed20] transition-all group">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#7c3aed] to-[#4f46e5] flex items-center justify-center font-black text-white shadow-lg group-hover:scale-110 transition-transform">
+                    {['J', 'A', 'M', 'S'][i-1]}
+                  </div>
+                  <div>
+                    <p className="font-black text-white text-sm uppercase">User_{i * 123}</p>
+                    <p className="text-[10px] text-[#64748b] font-medium tracking-wider">A obtenu le badge Azure Architecture</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-[#64748b] text-[10px] font-mono">Il y a {i * 15}m</p>
+                  <p className="text-emerald-500 text-[10px] font-bold uppercase mt-1">Score: {90 + i}%</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-[#7c3aed] to-[#4f46e5] rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 blur-[100px] -mr-32 -mt-32" />
+          <UserPlus size={48} className="text-white/20 mb-6" />
+          <h2 className="text-3xl font-black tracking-tighter uppercase leading-tight mb-4">Besoin de plus de quiz ?</h2>
+          <p className="text-white/80 font-medium mb-10 leading-relaxed">Générez instantanément un nouveau parcours de certification avec notre outil de création assistée.</p>
+          <button className="w-full py-5 bg-white text-[#7c3aed] rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl hover:-translate-y-1 transition-all active:scale-95">
+            Créer un Quiz
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};

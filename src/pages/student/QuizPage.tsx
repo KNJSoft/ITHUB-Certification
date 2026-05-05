@@ -1,0 +1,200 @@
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { quizService } from '../../api/services';
+import { Quiz } from '../../api/mockData';
+import { ChevronRight, ChevronLeft, Flag, Timer, Info } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { cn } from '../../lib/utils';
+
+export const QuizPage: React.FC = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  
+  const [quiz, setQuiz] = useState<Quiz | null>(null);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [answers, setAnswers] = useState<number[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [hasStarted, setHasStarted] = useState(false);
+
+  useEffect(() => {
+    const fetchQuiz = async () => {
+      try {
+        const data = await quizService.getQuizById(id!);
+        setQuiz(data);
+        setAnswers(new Array(data.questions.length).fill(-1));
+        setTimeLeft((data.timeLimit || 20) * 60);
+        setHasStarted(true);
+      } catch (err) {
+        navigate('/app/dashboard');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchQuiz();
+  }, [id, navigate]);
+
+  useEffect(() => {
+    if (!hasStarted || timeLeft <= 0) {
+      if (hasStarted && timeLeft <= 0) {
+        handleSubmit();
+      }
+      return;
+    }
+    const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+    return () => clearInterval(timer);
+  }, [timeLeft, hasStarted]);
+
+  const handleSelect = (optionIdx: number) => {
+    const nextAnswers = [...answers];
+    nextAnswers[currentIdx] = optionIdx;
+    setAnswers(nextAnswers);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const result = await quizService.submitQuiz(id!, answers);
+      const attemptsRemaining = (quiz?.attemptsRemaining || 1) - 1;
+      navigate(`/app/quiz/${id}/result`, { 
+        state: { 
+          result,
+          attemptsRemaining
+        } 
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  if (loading || !quiz) return (
+    <div className="flex items-center justify-center h-[60vh]">
+      <div className="w-12 h-12 border-4 border-[#2563eb] border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const currentQuestion = quiz.questions[currentIdx];
+  const progress = ((currentIdx + 1) / quiz.questions.length) * 100;
+  const isAnswered = answers[currentIdx] !== -1;
+
+  return (
+    <div className="max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-140px)]">
+      {/* Sticky Quiz Header */}
+      <div className="bg-[#1e293b] border border-[#334155] rounded-3xl p-6 mb-8 flex items-center justify-between sticky top-24 z-30 shadow-2xl backdrop-blur-sm">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-[#2563eb] text-white rounded-2xl flex items-center justify-center font-black shadow-lg shadow-[#2563eb]/20">
+            {currentIdx + 1}
+          </div>
+          <div>
+            <h1 className="font-bold text-[#f8fafc] leading-tight">{quiz.title}</h1>
+            <p className="text-[10px] text-[#94a3b8] uppercase tracking-widest font-black">Question en cours</p>
+          </div>
+        </div>
+
+        <div className={cn(
+          "flex items-center gap-3 px-5 py-2.5 rounded-xl border font-mono font-black text-lg min-w-[120px] justify-center transition-all",
+          timeLeft < 60 ? "bg-red-500/10 border-red-500 text-red-500 animate-pulse scale-105" : "bg-[#0f172a] border-[#334155] text-[#2563eb]"
+        )}>
+          <Timer size={20} />
+          <span>{formatTime(timeLeft)}</span>
+        </div>
+      </div>
+
+      <div className="h-1.5 bg-[#1e293b] rounded-full overflow-hidden mb-8 border border-[#334155]">
+        <motion.div 
+          initial={{ width: 0 }}
+          animate={{ width: `${progress}%` }}
+          className="h-full bg-gradient-to-r from-[#2563eb] to-[#60a5fa]" 
+        />
+      </div>
+
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentIdx}
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 1.02 }}
+          transition={{ duration: 0.2 }}
+          className="bg-[#1e293b] border border-[#334155] rounded-[2.5rem] p-10 flex-1 flex flex-col shadow-xl"
+        >
+          <div className="flex items-start gap-4 mb-10">
+             <div className="mt-1.5"><Info size={20} className="text-[#2563eb]" /></div>
+             <h2 className="text-2xl font-black leading-snug text-[#f8fafc]">{currentQuestion.text}</h2>
+          </div>
+          
+          <div className="space-y-4 flex-1">
+            {currentQuestion.options.map((option, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleSelect(idx)}
+                className={cn(
+                  "w-full text-left p-6 rounded-2xl border transition-all duration-200 group flex items-center gap-4 relative overflow-hidden",
+                  answers[currentIdx] === idx 
+                    ? "bg-[#2563eb]/20 border-[#2563eb] ring-2 ring-[#2563eb]/10" 
+                    : "bg-[#0f172a] border-[#334155] hover:border-[#475569] hover:bg-[#1e293b]"
+                )}
+              >
+                <div className={cn(
+                  "w-6 h-6 rounded-lg border-2 flex-shrink-0 flex items-center justify-center transition-all",
+                  answers[currentIdx] === idx ? "bg-[#2563eb] border-[#2563eb] rotate-0" : "border-[#334155] group-hover:border-[#475569] rotate-45"
+                )}>
+                  {answers[currentIdx] === idx && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                </div>
+                <span className={cn(
+                  "font-bold text-lg",
+                  answers[currentIdx] === idx ? "text-white" : "text-[#94a3b8] group-hover:text-[#cbd5e1]"
+                )}>{option}</span>
+                
+                {answers[currentIdx] === idx && (
+                   <motion.div layoutId="selection-bg" className="absolute left-0 bottom-0 top-0 w-1 bg-[#2563eb]" />
+                )}
+              </button>
+            ))}
+          </div>
+        </motion.div>
+      </AnimatePresence>
+
+      <div className="grid grid-cols-2 gap-4 mt-8">
+        <button
+          disabled={currentIdx === 0}
+          onClick={() => setCurrentIdx(prev => prev - 1)}
+          className="flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest text-[#94a3b8] bg-[#1e293b] border border-[#334155] hover:text-[#f8fafc] disabled:opacity-30 transition-all active:scale-95"
+        >
+          <ChevronLeft size={20} />
+          <span>Précédent</span>
+        </button>
+
+        {currentIdx === quiz.questions.length - 1 ? (
+          <button
+            onClick={handleSubmit}
+            disabled={!isAnswered}
+            className={cn(
+               "flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all transform active:scale-95 shadow-xl",
+               isAnswered ? "bg-[#2563eb] text-white shadow-[#2563eb]/20 hover:bg-[#1d4ed8]" : "bg-[#334155] text-[#64748b] cursor-not-allowed"
+            )}
+          >
+            <Flag size={20} />
+            <span>Terminer le Quiz</span>
+          </button>
+        ) : (
+          <button
+            onClick={() => setCurrentIdx(prev => prev + 1)}
+            disabled={!isAnswered}
+            className={cn(
+               "flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all active:scale-95",
+               isAnswered ? "bg-[#1e293b] border border-[#2563eb] text-white" : "bg-[#0f172a] border border-[#334155] text-[#64748b] cursor-not-allowed"
+            )}
+          >
+            <span>Question Suivante</span>
+            <ChevronRight size={20} />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
