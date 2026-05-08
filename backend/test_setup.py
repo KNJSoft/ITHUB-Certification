@@ -1,7 +1,7 @@
-#!/usr/bin/env python
-"""
-Test script to verify IT HUB platform setup
-"""
+"""#!/usr/bin/env python
+
+#Test script to verify IT HUB platform setup
+
 
 import os
 import sys
@@ -9,7 +9,7 @@ import django
 from django.conf import settings
 
 def test_imports():
-    """Test if all required modules can be imported"""
+    #Test if all required modules can be imported
     print("🧪 Testing imports...")
     
     try:
@@ -57,7 +57,7 @@ def test_imports():
     return True
 
 def test_django_setup():
-    """Test Django configuration"""
+    #Test Django configuration
     print("\n🔧 Testing Django setup...")
     
     try:
@@ -78,7 +78,7 @@ def test_django_setup():
     return True
 
 def test_database():
-    """Test database connection"""
+    #Test database connection
     print("\n💾 Testing database connection...")
     
     try:
@@ -92,7 +92,7 @@ def test_database():
         return False
 
 def test_urls():
-    """Test URL configuration"""
+    #Test URL configuration
     print("\n🌐 Testing URL configuration...")
     
     try:
@@ -124,7 +124,7 @@ def test_urls():
         return False
 
 def main():
-    """Run all tests"""
+    #Run all tests
     print("🚀 IT HUB Platform Setup Verification")
     print("=" * 50)
     
@@ -163,3 +163,4 @@ def main():
 if __name__ == "__main__":
     success = main()
     sys.exit(0 if success else 1)
+"""
