@@ -1,14 +1,14 @@
 """#!/usr/bin/env python
-"""
-Setup script for IT HUB Certification Platform Backend
-"""
+
+#Setup script for IT HUB Certification Platform Backend
+
 
 import os
 import sys
 import subprocess
 
 def run_command(command, description):
-    """Run a command and handle errors"""
+    #Run a command and handle errors
     print(f"\n{'='*50}")
     print(f"Running: {description}")
     print(f"Command: {command}")
@@ -26,7 +26,7 @@ def run_command(command, description):
         return False
 
 def main():
-    """Main setup process"""
+    #Main setup process
     print("🚀 IT HUB Certification Platform Backend Setup")
     print("=" * 50)
     
