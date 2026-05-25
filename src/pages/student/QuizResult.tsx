@@ -17,8 +17,12 @@ export const QuizResult: React.FC = () => {
     );
   }
 
-  const { score, total, percentage, passed } = state.result;
-  const attemptsRemaining = state.attemptsRemaining;
+  const { attempt, correct_answers, remaining_attempts, certification_obtained } = state.result;
+  const { score, passed, quiz_title } = attempt;
+  
+  // Calculate percentage based on score
+  const totalQuestions = Object.keys(correct_answers).length;
+  const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
 
   return (
     <div className="max-w-2xl mx-auto py-10">
@@ -65,7 +69,7 @@ export const QuizResult: React.FC = () => {
           <p className="text-[#94a3b8] text-lg font-medium px-8">
             {passed 
               ? 'Vous avez franchi les obstacles avec succès. Votre badge est prêt !' 
-              : attemptsRemaining === 0 
+              : remaining_attempts === 0 
                 ? 'Accès verrouillé. Vous avez épuisé toutes vos chances pour ce quiz.'
                 : `Score insuffisant (${percentage}%). Il vous reste encore une chance !`}
           </p>
@@ -75,7 +79,7 @@ export const QuizResult: React.FC = () => {
           <div className="grid grid-cols-2 gap-8">
             <div className="bg-[#0f172a] p-8 rounded-3xl border border-[#334155] text-center">
               <span className="text-[#64748b] text-[10px] font-black uppercase tracking-[0.2em] block mb-2">Résultat Final</span>
-              <span className="text-4xl font-mono font-black text-white">{score} <span className="text-[#2563eb]">/</span> {total}</span>
+              <span className="text-4xl font-mono font-black text-white">{score} <span className="text-[#2563eb]">/</span> {totalQuestions}</span>
             </div>
             <div className="bg-[#0f172a] p-8 rounded-3xl border border-[#334155] text-center">
               <span className="text-[#64748b] text-[10px] font-black uppercase tracking-[0.2em] block mb-2">Précision</span>
@@ -115,7 +119,7 @@ export const QuizResult: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-5">
-              {attemptsRemaining > 0 ? (
+              {remaining_attempts > 0 ? (
                 <button
                   onClick={() => navigate(`/app/quiz/${id}`)}
                   className="w-full flex items-center justify-center gap-3 bg-[#2563eb] hover:bg-[#1d4ed8] text-white py-5 rounded-3xl font-black uppercase tracking-widest text-sm transition-all transform hover:scale-[1.02] shadow-xl shadow-[#2563eb]/20"

@@ -29,7 +29,7 @@ export const Login: React.FC<LoginProps> = ({ isAdmin = false }) => {
       login(response.user as any, response.token);
       navigate(isAdmin ? '/admin/dashboard' : '/app/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Login failed');
+      setError(err.message || 'Identifiants invalides');
     } finally {
       setLoading(false);
     }

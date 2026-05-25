@@ -12,6 +12,9 @@ export const AdminSettings: React.FC = () => {
            <h1 className="text-4xl font-black tracking-tight text-white uppercase">Paramètres</h1>
         </div>
         <p className="text-[#64748b] font-medium tracking-wide">Configurez les options globales de la plateforme.</p>
+        <div className="bg-amber-500/10 border border-amber-500/20 text-amber-500 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest w-fit">
+          Mode statique - Pas d'endpoint API disponible
+        </div>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">

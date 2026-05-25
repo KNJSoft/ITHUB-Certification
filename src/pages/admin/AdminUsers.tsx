@@ -1,21 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { adminService } from '../../api/services';
+import { UserListItem } from '../../api/types';
 import { Search, User, Mail, Calendar, Award, ExternalLink, Activity, Filter, Eye } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '../../lib/utils';
 
 export const AdminUsers: React.FC = () => {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<UserListItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const data = await adminService.getCertifiedUsers();
+        const data = await adminService.getUsers();
         setUsers(data);
-      } catch (err) {
-        console.error(err);
+      } catch (err: any) {
+        setError(err.message || 'Erreur lors de la récupération des utilisateurs');
       } finally {
         setLoading(false);
       }
@@ -24,7 +26,7 @@ export const AdminUsers: React.FC = () => {
   }, []);
 
   const filteredUsers = users.filter(u => 
-    u.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    `${u.first_name} ${u.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) || 
     u.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -33,6 +35,16 @@ export const AdminUsers: React.FC = () => {
         <div className="w-12 h-12 border-4 border-[#7c3aed] border-t-transparent rounded-full animate-spin" />
       </div>
   );
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-6 py-4 rounded-xl">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-10">
@@ -83,9 +95,9 @@ export const AdminUsers: React.FC = () => {
                   <td className="px-10 py-8">
                     <div className="flex items-center gap-5">
                       <div className="w-12 h-12 bg-gradient-to-br from-[#7c3aed] to-[#4f46e5] rounded-[1.25rem] flex items-center justify-center font-black text-white shadow-lg group-hover:scale-110 transition-transform">
-                        {u.name.charAt(0)}
+                        {u.first_name?.charAt(0) || u.email.charAt(0)}
                       </div>
-                      <p className="font-black text-white group-hover:text-[#7c3aed] transition-colors">{u.name}</p>
+                      <p className="font-black text-white group-hover:text-[#7c3aed] transition-colors">{u.first_name} {u.last_name}</p>
                     </div>
                   </td>
                   <td className="px-8 py-8 text-[#94a3b8] font-medium text-sm">
@@ -94,15 +106,15 @@ export const AdminUsers: React.FC = () => {
                   <td className="px-8 py-8 text-center">
                     <div className="flex flex-col items-center gap-1.5">
                        <span className="bg-[#7c3aed10] text-[#7c3aed] text-[10px] font-black px-3 py-1 rounded-full border border-[#7c3aed15]">
-                          {u.cert}
+                          {u.certifications_count || 0}
                        </span>
-                       <span className="text-[9px] text-[#64748b] font-bold uppercase tracking-widest">Score: {92 + idx}%</span>
+                       <span className="text-[9px] text-[#64748b] font-bold uppercase tracking-widest">Certifications</span>
                     </div>
                   </td>
                   <td className="px-8 py-8 text-center">
                     <div className="flex flex-col items-center gap-1">
                       <Activity size={14} className="text-[#64748b]" />
-                      <span className="text-[11px] font-bold text-[#94a3b8]">Ily a {idx + 1}j</span>
+                      <span className="text-[11px] font-bold text-[#94a3b8]">{u.created_at ? new Date(u.created_at).toLocaleDateString('fr-FR') : 'N/A'}</span>
                     </div>
                   </td>
                   <td className="px-10 py-8 text-right">

@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { adminService } from '../../api/services';
+import { AdminStats } from '../../api/types';
 import { Users, Award, TrendingUp, BarChart3, Zap, ChevronRight, UserPlus } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '../../lib/utils';
 
 export const AdminDashboard: React.FC = () => {
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
         const data = await adminService.getStats();
         setStats(data);
-      } catch (err) {
-        console.error(err);
+      } catch (err: any) {
+        setError(err.message || 'Erreur lors de la récupération des statistiques');
       } finally {
         setLoading(false);
       }
@@ -28,18 +30,28 @@ export const AdminDashboard: React.FC = () => {
       </div>
   );
 
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-6 py-4 rounded-xl">
+          {error}
+        </div>
+      </div>
+    );
+  }
+
   const statCards = [
     { 
       label: 'Total Inscrits', 
-      value: '1,284', 
+      value: stats?.total_users || 0, 
       change: '+12%', 
       icon: Users, 
       color: 'bg-blue-500', 
       trend: 'up' 
     },
     { 
-      label: 'Utilisateurs Certifiés', 
-      value: stats.totalCertified, 
+      label: 'Quiz Actifs', 
+      value: stats?.total_quizzes || 0, 
       change: '+5%', 
       icon: Award, 
       color: 'bg-emerald-500', 
@@ -47,19 +59,19 @@ export const AdminDashboard: React.FC = () => {
     },
     { 
       label: 'Tentatives Quiz', 
-      value: stats.totalAttempts, 
+      value: stats?.total_attempts || 0, 
       change: '+18%', 
       icon: Zap, 
       color: 'bg-[#7c3aed]', 
       trend: 'up' 
     },
     { 
-      label: 'Taux de Réussite', 
-      value: `${stats.passRate}%`, 
-      change: '-2%', 
+      label: 'Certifications', 
+      value: stats?.total_certifications || 0, 
+      change: '+8%', 
       icon: TrendingUp, 
       color: 'bg-amber-500', 
-      trend: 'down' 
+      trend: 'up' 
     },
   ];
 

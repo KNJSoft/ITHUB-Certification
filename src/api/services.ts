@@ -1,86 +1,205 @@
-import { MOCK_QUIZZES, MOCK_CERTIFICATIONS, MOCK_STATS } from './mockData';
+import api from './client';
 
-const DELAY = 500;
-
+// --- Authentication Service ---
 export const authService = {
   login: async (email: string, password: string, isAdmin = false) => {
-    await new Promise(resolve => setTimeout(resolve, DELAY));
-    if (email && password) {
-      const user = {
-        id: isAdmin ? 'admin_1' : 'student_1',
-        name: isAdmin ? 'Admin User' : 'Eric T.',
-        email,
-        role: isAdmin ? 'admin' : 'student'
-      };
-      return { user, token: 'mock-jwt-token' };
+    try {
+      const response = await api.post('/auth/login/', { email, password });
+      const { user, access, refresh } = response.data;
+      
+      // Store tokens in localStorage
+      localStorage.setItem('access_token', access);
+      localStorage.setItem('refresh_token', refresh);
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      return { user, token: access };
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Identifiants invalides');
     }
-    throw new Error('Invalid credentials');
   },
-  register: async (data: any) => {
-    await new Promise(resolve => setTimeout(resolve, DELAY));
-    return { success: true };
+  
+  register: async (data: {
+    email: string;
+    first_name: string;
+    last_name: string;
+    password: string;
+    password_confirm: string;
+    phone_number?: string;
+    country?: string;
+    country_code?: string;
+  }) => {
+    try {
+      const response = await api.post('/auth/register/', data);
+      const { user, access, refresh } = response.data;
+      
+      // Store tokens in localStorage
+      localStorage.setItem('access_token', access);
+      localStorage.setItem('refresh_token', refresh);
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      return { user, token: access };
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de l\'inscription');
+    }
+  },
+  
+  logout: () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+  },
+  
+  getCurrentUser: async () => {
+    try {
+      const response = await api.get('/auth/me/');
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la récupération du profil');
+    }
+  },
+  
+  refreshToken: async () => {
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (!refreshToken) throw new Error('No refresh token');
+    
+    try {
+      const response = await api.post('/auth/token/refresh/', { refresh: refreshToken });
+      const { access } = response.data;
+      localStorage.setItem('access_token', access);
+      return access;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors du rafraîchissement du token');
+    }
   }
 };
 
+// --- Quiz Service ---
 export const quizService = {
   getQuizzes: async () => {
-    await new Promise(resolve => setTimeout(resolve, DELAY));
-    return MOCK_QUIZZES;
+    try {
+      const response = await api.get('/quizzes/');
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la récupération des quiz');
+    }
   },
+  
   getQuizById: async (id: string) => {
-    await new Promise(resolve => setTimeout(resolve, DELAY));
-    const quiz = MOCK_QUIZZES.find(q => q.id === id);
-    if (!quiz) throw new Error('Quiz not found');
-    return quiz;
+    try {
+      const response = await api.get(`/quizzes/${id}/`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Quiz non trouvé');
+    }
   },
-  submitQuiz: async (quizId: string, answers: number[]) => {
-    await new Promise(resolve => setTimeout(resolve, DELAY));
-    const quiz = MOCK_QUIZZES.find(q => q.id === quizId);
-    if (!quiz) throw new Error('Quiz not found');
-    
-    let score = 0;
-    quiz.questions.forEach((q, i) => {
-      if (answers[i] === q.correctAnswer) score++;
-    });
-    
-    const percentage = (score / quiz.questions.length) * 100;
-    const passed = percentage >= 80;
-    
-    return { score, total: quiz.questions.length, percentage, passed };
+  
+  submitQuiz: async (quizId: string, answers: Record<string, string>) => {
+    try {
+      const response = await api.post(`/quizzes/${quizId}/attempt/`, { answers });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la soumission du quiz');
+    }
   },
+  
   // Admin only
   createQuiz: async (quiz: any) => {
-    await new Promise(resolve => setTimeout(resolve, DELAY));
-    return { ...quiz, id: Math.random().toString(36).substr(2, 9) };
+    try {
+      const response = await api.post('/admin/quizzes/create/', quiz);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la création du quiz');
+    }
   },
+  
   updateQuiz: async (id: string, quiz: any) => {
-    await new Promise(resolve => setTimeout(resolve, DELAY));
-    return quiz;
+    try {
+      const response = await api.put(`/admin/quizzes/${id}/`, quiz);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la mise à jour du quiz');
+    }
   },
+  
   deleteQuiz: async (id: string) => {
-    await new Promise(resolve => setTimeout(resolve, DELAY));
-    return { success: true };
+    try {
+      await api.delete(`/admin/quizzes/${id}/`);
+      return { success: true };
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la suppression du quiz');
+    }
+  },
+  
+  getAdminQuizzes: async () => {
+    try {
+      const response = await api.get('/admin/quizzes/');
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la récupération des quiz');
+    }
+  },
+
+  getAdminQuizById: async (quizId: string) => {
+    try {
+      const response = await api.get(`/admin/quizzes/${quizId}/`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la récupération du quiz');
+    }
   }
 };
 
+// --- Admin Service ---
 export const adminService = {
   getStats: async () => {
-    await new Promise(resolve => setTimeout(resolve, DELAY));
-    return MOCK_STATS;
+    try {
+      const response = await api.get('/admin/stats/');
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la récupération des statistiques');
+    }
   },
-  getCertifiedUsers: async () => {
-    await new Promise(resolve => setTimeout(resolve, DELAY));
-    return [
-      { id: '1', name: 'John Doe', email: 'john@example.com', cert: 'React Advanced', date: '2024-02-10' },
-      { id: '2', name: 'Jane Smith', email: 'jane@example.com', cert: 'Azure Cloud', date: '2024-03-01' },
-      { id: '3', name: 'Bob Wilson', email: 'bob@example.com', cert: 'React Advanced', date: '2024-03-12' }
-    ];
+  
+  getUsers: async () => {
+    try {
+      const response = await api.get('/admin/users/');
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la récupération des utilisateurs');
+    }
   }
 };
 
+// --- Student Service ---
 export const studentService = {
   getCertifications: async () => {
-    await new Promise(resolve => setTimeout(resolve, DELAY));
-    return MOCK_CERTIFICATIONS;
+    try {
+      const response = await api.get('/certifications/');
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la récupération des attestations');
+    }
+  },
+  
+  downloadCertificationPNG: async (certificationId: string) => {
+    try {
+      const response = await api.get(`/certifications/${certificationId}/png/`, {
+        responseType: 'blob'
+      });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors du téléchargement du PNG');
+    }
+  },
+  
+  downloadCertificationPDF: async (certificationId: string) => {
+    try {
+      const response = await api.get(`/certifications/${certificationId}/pdf/`, {
+        responseType: 'blob'
+      });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors du téléchargement du PDF');
+    }
   }
 };

@@ -57,6 +57,10 @@ class User(AbstractUser):
     )
     first_name = models.CharField(max_length=150, blank=False)
     last_name = models.CharField(max_length=150, blank=False)
+    profile_image = models.ImageField(upload_to='profile_images/', blank=True, null=True, help_text="Photo de profil de l'utilisateur")
+    phone_number = models.CharField(max_length=20, blank=True, null=True, help_text="Numéro de téléphone")
+    country = models.CharField(max_length=100, blank=True, null=True, help_text="Pays de résidence")
+    country_code = models.CharField(max_length=5, blank=True, null=True, help_text="Code pays (ex: FR, US, etc.)")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)  # Pour activer/désactiver le compte
@@ -76,6 +80,7 @@ class User(AbstractUser):
         indexes = [
             models.Index(fields=['email']),
             models.Index(fields=['role']),
+            models.Index(fields=['country']),
         ]
 
     def __str__(self):

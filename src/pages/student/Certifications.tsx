@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { studentService } from '../../api/services';
-import { Certification } from '../../api/mockData';
+import { Certification } from '../../api/types';
 import { Award, Download, Calendar, ExternalLink, Share2, Medal } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '../../lib/utils';
@@ -8,14 +9,17 @@ import { cn } from '../../lib/utils';
 export const Certifications: React.FC = () => {
   const [certs, setCerts] = useState<Certification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [downloading, setDownloading] = useState<{ [key: string]: boolean }>({});
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCerts = async () => {
       try {
         const data = await studentService.getCertifications();
         setCerts(data);
-      } catch (err) {
-        console.error(err);
+      } catch (err: any) {
+        setError(err.message || 'Erreur lors de la récupération des attestations');
       } finally {
         setLoading(false);
       }
@@ -23,11 +27,59 @@ export const Certifications: React.FC = () => {
     fetchCerts();
   }, []);
 
+  const handleDownloadPNG = async (certId: string) => {
+    setDownloading(prev => ({ ...prev, [certId]: true }));
+    try {
+      const blob = await studentService.downloadCertificationPNG(certId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `certification-${certId}.png`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors du téléchargement');
+    } finally {
+      setDownloading(prev => ({ ...prev, [certId]: false }));
+    }
+  };
+
+  const handleDownloadPDF = async (certId: string) => {
+    setDownloading(prev => ({ ...prev, [certId]: true }));
+    try {
+      const blob = await studentService.downloadCertificationPDF(certId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `certification-${certId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors du téléchargement');
+    } finally {
+      setDownloading(prev => ({ ...prev, [certId]: false }));
+    }
+  };
+
   if (loading) return (
     <div className="flex items-center justify-center h-[60vh]">
       <div className="w-12 h-12 border-4 border-[#2563eb] border-t-transparent rounded-full animate-spin" />
     </div>
   );
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-6 py-4 rounded-xl">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-12">
@@ -47,7 +99,10 @@ export const Certifications: React.FC = () => {
           </div>
           <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-3">Aucun badge pour le moment</h3>
           <p className="text-[#64748b] font-medium mb-12 text-center max-w-sm">Relevez le défi de nos quiz pour obtenir vos premières certifications officielles.</p>
-          <button className="bg-[#2563eb] text-white px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-[#2563eb]/20 hover:-translate-y-1 transition-all active:scale-95">
+          <button 
+            onClick={() => navigate('/app/dashboard')}
+            className="bg-[#2563eb] text-white px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-[#2563eb]/20 hover:-translate-y-1 transition-all active:scale-95"
+          >
             Parcourir les Quizzes
           </button>
         </div>
@@ -70,27 +125,31 @@ export const Certifications: React.FC = () => {
 
               <div className="flex-1 space-y-6 text-center md:text-left">
                 <div>
-                  <h3 className="text-2xl font-black tracking-tight text-white uppercase group-hover:text-[#2563eb] transition-colors leading-tight mb-2">{cert.quizTitle}</h3>
+                  <h3 className="text-2xl font-black tracking-tight text-white uppercase group-hover:text-[#2563eb] transition-colors leading-tight mb-2">{cert.quiz_title}</h3>
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[10px] font-black tracking-widest uppercase text-[#64748b]">
                     <div className="flex items-center gap-2">
                       <Calendar size={14} className="text-[#2563eb]" />
-                      <span>Obtenu le {cert.issueDate}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Medal size={14} className="text-emerald-500" />
-                      <span className="text-emerald-500">Score: {cert.score}%</span>
+                      <span>Obtenu le {new Date(cert.obtained_date).toLocaleDateString('fr-FR')}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                  <button className="flex items-center gap-2 px-6 py-3 bg-[#2563eb] text-white rounded-xl font-black uppercase text-[10px] tracking-widest transition-all hover:bg-[#1d4ed8] shadow-lg shadow-[#2563eb]/10 active:scale-95">
+                  <button
+                    onClick={() => handleDownloadPDF(cert.id)}
+                    disabled={downloading[cert.id]}
+                    className="flex items-center gap-2 px-6 py-3 bg-[#2563eb] text-white rounded-xl font-black uppercase text-[10px] tracking-widest transition-all hover:bg-[#1d4ed8] shadow-lg shadow-[#2563eb]/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
                     <Download size={14} />
-                    <span>PDF</span>
+                    <span>{downloading[cert.id] ? 'Téléchargement...' : 'PDF'}</span>
                   </button>
-                  <button className="flex items-center gap-2 px-6 py-3 bg-[#0a0f1d] border border-[#2563eb20] text-[#2563eb] rounded-xl font-black uppercase text-[10px] tracking-widest transition-all hover:bg-[#2563eb10] active:scale-95">
-                    <Share2 size={14} />
-                    <span>LinkedIn</span>
+                  <button
+                    onClick={() => handleDownloadPNG(cert.id)}
+                    disabled={downloading[cert.id]}
+                    className="flex items-center gap-2 px-6 py-3 bg-[#0a0f1d] border border-[#2563eb20] text-[#2563eb] rounded-xl font-black uppercase text-[10px] tracking-widest transition-all hover:bg-[#2563eb10] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Download size={14} />
+                    <span>{downloading[cert.id] ? 'Téléchargement...' : 'PNG'}</span>
                   </button>
                 </div>
               </div>

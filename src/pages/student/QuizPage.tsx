@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { quizService } from '../../api/services';
-import { Quiz } from '../../api/mockData';
+import { QuizDetail } from '../../api/types';
 import { ChevronRight, ChevronLeft, Flag, Timer, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../../lib/utils';
@@ -10,10 +10,11 @@ export const QuizPage: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   
-  const [quiz, setQuiz] = useState<Quiz | null>(null);
+  const [quiz, setQuiz] = useState<QuizDetail | null>(null);
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [answers, setAnswers] = useState<number[]>([]);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [timeLeft, setTimeLeft] = useState(0);
   const [hasStarted, setHasStarted] = useState(false);
 
@@ -22,11 +23,11 @@ export const QuizPage: React.FC = () => {
       try {
         const data = await quizService.getQuizById(id!);
         setQuiz(data);
-        setAnswers(new Array(data.questions.length).fill(-1));
-        setTimeLeft((data.timeLimit || 20) * 60);
+        setTimeLeft(data.timer_minutes * 60);
         setHasStarted(true);
-      } catch (err) {
-        navigate('/app/dashboard');
+      } catch (err: any) {
+        setError(err.message || 'Erreur lors de la récupération du quiz');
+        setTimeout(() => navigate('/app/dashboard'), 2000);
       } finally {
         setLoading(false);
       }
@@ -45,30 +46,41 @@ export const QuizPage: React.FC = () => {
     return () => clearInterval(timer);
   }, [timeLeft, hasStarted]);
 
-  const handleSelect = (optionIdx: number) => {
-    const nextAnswers = [...answers];
-    nextAnswers[currentIdx] = optionIdx;
-    setAnswers(nextAnswers);
+  const handleSelect = (optionId: string) => {
+    const currentQuestion = quiz?.questions[currentIdx];
+    if (currentQuestion) {
+      setAnswers(prev => ({
+        ...prev,
+        [currentQuestion.id]: optionId
+      }));
+    }
   };
 
   const handleSubmit = async () => {
     try {
       const result = await quizService.submitQuiz(id!, answers);
-      const attemptsRemaining = (quiz?.attemptsRemaining || 1) - 1;
       navigate(`/app/quiz/${id}/result`, { 
         state: { 
           result,
-          attemptsRemaining
+          quizId: id
         } 
       });
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors de la soumission du quiz');
     }
   };
 
-  if (loading || !quiz) return (
+  if (loading) return (
     <div className="flex items-center justify-center h-[60vh]">
       <div className="w-12 h-12 border-4 border-[#2563eb] border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+
+  if (error || !quiz) return (
+    <div className="flex items-center justify-center h-[60vh]">
+      <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-6 py-4 rounded-xl">
+        {error || 'Quiz non trouvé'}
+      </div>
     </div>
   );
 
@@ -80,7 +92,7 @@ export const QuizPage: React.FC = () => {
 
   const currentQuestion = quiz.questions[currentIdx];
   const progress = ((currentIdx + 1) / quiz.questions.length) * 100;
-  const isAnswered = answers[currentIdx] !== -1;
+  const isAnswered = currentQuestion ? answers[currentQuestion.id] !== undefined : false;
 
   return (
     <div className="max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-140px)]">
@@ -128,29 +140,29 @@ export const QuizPage: React.FC = () => {
           </div>
           
           <div className="space-y-4 flex-1">
-            {currentQuestion.options.map((option, idx) => (
+            {currentQuestion.options.map((option) => (
               <button
-                key={idx}
-                onClick={() => handleSelect(idx)}
+                key={option.id}
+                onClick={() => handleSelect(option.id)}
                 className={cn(
                   "w-full text-left p-6 rounded-2xl border transition-all duration-200 group flex items-center gap-4 relative overflow-hidden",
-                  answers[currentIdx] === idx 
+                  answers[currentQuestion.id] === option.id 
                     ? "bg-[#2563eb]/20 border-[#2563eb] ring-2 ring-[#2563eb]/10" 
                     : "bg-[#0f172a] border-[#334155] hover:border-[#475569] hover:bg-[#1e293b]"
                 )}
               >
                 <div className={cn(
                   "w-6 h-6 rounded-lg border-2 flex-shrink-0 flex items-center justify-center transition-all",
-                  answers[currentIdx] === idx ? "bg-[#2563eb] border-[#2563eb] rotate-0" : "border-[#334155] group-hover:border-[#475569] rotate-45"
+                  answers[currentQuestion.id] === option.id ? "bg-[#2563eb] border-[#2563eb] rotate-0" : "border-[#334155] group-hover:border-[#475569] rotate-45"
                 )}>
-                  {answers[currentIdx] === idx && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                  {answers[currentQuestion.id] === option.id && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
                 </div>
                 <span className={cn(
                   "font-bold text-lg",
-                  answers[currentIdx] === idx ? "text-white" : "text-[#94a3b8] group-hover:text-[#cbd5e1]"
-                )}>{option}</span>
+                  answers[currentQuestion.id] === option.id ? "text-white" : "text-[#94a3b8] group-hover:text-[#cbd5e1]"
+                )}>{option.text}</span>
                 
-                {answers[currentIdx] === idx && (
+                {answers[currentQuestion.id] === option.id && (
                    <motion.div layoutId="selection-bg" className="absolute left-0 bottom-0 top-0 w-1 bg-[#2563eb]" />
                 )}
               </button>

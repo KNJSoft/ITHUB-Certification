@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { quizService } from '../../api/services';
-import { Quiz } from '../../api/mockData';
+import { Quiz } from '../../api/types';
 import { Plus, Search, Edit2, Trash2, BookOpen, Calendar, Star, Award, ToggleRight as Toggle, Trash } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '../../lib/utils';
@@ -8,6 +8,7 @@ import { cn } from '../../lib/utils';
 export const AdminQuizzes: React.FC = () => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newQuiz, setNewQuiz] = useState({
@@ -21,10 +22,10 @@ export const AdminQuizzes: React.FC = () => {
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
-        const data = await quizService.getQuizzes();
+        const data = await quizService.getAdminQuizzes();
         setQuizzes(data);
-      } catch (err) {
-        console.error(err);
+      } catch (err: any) {
+        setError(err.message || 'Erreur lors de la récupération des quiz');
       } finally {
         setLoading(false);
       }
@@ -37,8 +38,8 @@ export const AdminQuizzes: React.FC = () => {
     try {
       await quizService.deleteQuiz(id);
       setQuizzes(quizzes.filter(q => q.id !== id));
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors de la suppression du quiz');
     }
   };
 
@@ -52,6 +53,16 @@ export const AdminQuizzes: React.FC = () => {
         <div className="w-12 h-12 border-4 border-[#7c3aed] border-t-transparent rounded-full animate-spin" />
       </div>
   );
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-6 py-4 rounded-xl">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-10">
@@ -109,7 +120,7 @@ export const AdminQuizzes: React.FC = () => {
                       </div>
                       <div>
                         <p className="font-black text-white group-hover:text-[#7c3aed] transition-colors">{quiz.title}</p>
-                        <p className="text-[10px] text-[#64748b] font-bold uppercase tracking-wider mt-1">{quiz.questions.length} Questions</p>
+                        <p className="text-[10px] text-[#64748b] font-bold uppercase tracking-wider mt-1">{quiz.questions_count || 'N/A'} Questions</p>
                       </div>
                     </div>
                   </td>
@@ -121,24 +132,24 @@ export const AdminQuizzes: React.FC = () => {
                   <td className="px-8 py-8 text-center">
                     <div className="flex flex-col items-center gap-1">
                       <Calendar size={14} className="text-[#64748b]" />
-                      <span className="text-[11px] font-bold text-[#94a3b8]">{quiz.expiresAt || 'Illimité'}</span>
+                      <span className="text-[11px] font-bold text-[#94a3b8]">{new Date(quiz.expiration_date).toLocaleDateString('fr-FR')}</span>
                     </div>
                   </td>
                   <td className="px-8 py-8 text-center">
                     <div className="flex items-center justify-center gap-1.5 text-white font-mono font-bold">
                        <Star size={14} className="text-amber-500 fill-amber-500" />
-                       <span>{quiz.attemptsAllowed}</span>
+                       <span>{quiz.max_attempts}</span>
                     </div>
                   </td>
                   <td className="px-8 py-8 text-center">
                     <div className="flex items-center justify-center gap-1.5 text-emerald-500 font-mono font-bold">
                        <Award size={14} />
-                       <span>{Math.floor(Math.random() * 50)}</span>
+                       <span>{quiz.attempts_count || 0}</span>
                     </div>
                   </td>
                   <td className="px-8 py-8 text-center">
                      <button className="text-[#7c3aed] hover:scale-110 transition-transform">
-                        <Toggle size={32} strokeWidth={1} fill="currentColor" fillOpacity={0.1} />
+                        <Toggle size={32} strokeWidth={1} fill="currentColor" fillOpacity={quiz.is_active ? 1 : 0.1} />
                      </button>
                   </td>
                   <td className="px-10 py-8 text-right">

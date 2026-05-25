@@ -24,7 +24,7 @@ from .permissions import IsAdmin, IsStudent, IsOwnerOrAdmin, IsAdminOrReadOnly, 
 @extend_schema(
     tags=['Authentication'],
     summary='Inscription d\'un nouvel utilisateur',
-    description='Crée un nouveau compte étudiant sur la plateforme',
+    description='Crée un nouveau compte étudiant sur la plateforme avec optionnellement une photo de profil, numéro de téléphone et pays',
     request=UserRegistrationSerializer,
     responses={201: UserProfileSerializer}
 )

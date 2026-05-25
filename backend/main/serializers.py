@@ -11,7 +11,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'first_name', 'last_name', 'password', 'password_confirm')
+        fields = ('email', 'first_name', 'last_name', 'phone_number', 'country', 'country_code', 'password', 'password_confirm')
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
@@ -43,10 +43,20 @@ class UserLoginSerializer(serializers.Serializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    profile_image_url = serializers.SerializerMethodField()
+    
     class Meta:
         model = User
-        fields = ('id', 'email', 'first_name', 'last_name', 'role', 'created_at')
+        fields = ('id', 'email', 'first_name', 'last_name', 'profile_image', 'profile_image_url', 'phone_number', 'country', 'country_code', 'role', 'created_at')
         read_only_fields = ('id', 'email', 'role', 'created_at')
+    
+    def get_profile_image_url(self, obj):
+        if obj.profile_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.profile_image.url)
+            return obj.profile_image.url
+        return None
 
 
 # --- Quiz Serializers ---
@@ -148,13 +158,22 @@ class CertificationSerializer(serializers.ModelSerializer):
 # --- Admin Serializers ---
 class UserListSerializer(serializers.ModelSerializer):
     certifications_count = serializers.SerializerMethodField()
+    profile_image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ('id', 'email', 'first_name', 'last_name', 'role', 'created_at', 'certifications_count')
+        fields = ('id', 'email', 'first_name', 'last_name', 'profile_image', 'profile_image_url', 'phone_number', 'country', 'country_code', 'role', 'created_at', 'certifications_count')
 
     def get_certifications_count(self, obj):
         return obj.certifications.count()
+    
+    def get_profile_image_url(self, obj):
+        if obj.profile_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.profile_image.url)
+            return obj.profile_image.url
+        return None
 
 
 class QuizAdminSerializer(serializers.ModelSerializer):
