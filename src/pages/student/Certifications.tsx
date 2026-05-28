@@ -108,7 +108,7 @@ export const Certifications: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {certs.map((cert, idx) => (
+          {Array.isArray(certs) && certs.map((cert, idx) => (
             <motion.div
               key={cert.id}
               initial={{ opacity: 0, y: 20 }}

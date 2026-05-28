@@ -25,7 +25,7 @@ export const AdminUsers: React.FC = () => {
     fetchUsers();
   }, []);
 
-  const filteredUsers = users.filter(u => 
+  const filteredUsers =Array.isArray(users) && users.filter(u => 
     `${u.first_name} ${u.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) || 
     u.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -90,7 +90,7 @@ export const AdminUsers: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#7c3aed05]">
-              {filteredUsers.map((u, idx) => (
+              {Array.isArray(filteredUsers) && filteredUsers.map((u, idx) => (
                 <tr key={u.id} className="group hover:bg-[#7c3aed05]/40 transition-all">
                   <td className="px-10 py-8">
                     <div className="flex items-center gap-5">

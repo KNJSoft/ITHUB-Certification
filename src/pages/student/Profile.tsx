@@ -49,7 +49,7 @@ export const Profile: React.FC = () => {
               </div>
             </div>
           </div>
-
+        {/*
           <button 
             onClick={logout}
             className="w-full py-5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-[1.5rem] font-black uppercase tracking-widest text-xs transition-all flex items-center justify-center gap-3 active:scale-95 border border-red-500/20"
@@ -57,6 +57,7 @@ export const Profile: React.FC = () => {
             <LogOut size={18} />
             Déconnexion
           </button>
+        */}
         </div>
 
         <div className="lg:col-span-2 space-y-8">

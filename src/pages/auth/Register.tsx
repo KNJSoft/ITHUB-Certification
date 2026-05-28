@@ -128,7 +128,7 @@ export const Register: React.FC = () => {
                 />
               </div>
             </div>
-
+            {/*
             <div>
               <label className="block text-sm font-medium text-[#94a3b8] mb-1.5 px-1">Numéro de téléphone (optionnel)</label>
               <div className="relative group">
@@ -144,7 +144,8 @@ export const Register: React.FC = () => {
                 />
               </div>
             </div>
-
+             */}
+            {/* 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-[#94a3b8] mb-1.5 px-1">Pays (optionnel)</label>
@@ -161,7 +162,8 @@ export const Register: React.FC = () => {
                   />
                 </div>
               </div>
-
+              */}
+              {/* 
               <div>
                 <label className="block text-sm font-medium text-[#94a3b8] mb-1.5 px-1">Code pays (optionnel)</label>
                 <div className="relative group">
@@ -179,7 +181,7 @@ export const Register: React.FC = () => {
                 </div>
               </div>
             </div>
-
+                */}
             <div>
               <label className="block text-sm font-medium text-[#94a3b8] mb-1.5 px-1">Mot de passe</label>
               <div className="relative group">

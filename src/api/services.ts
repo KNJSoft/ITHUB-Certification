@@ -2,7 +2,7 @@ import api from './client';
 
 // --- Authentication Service ---
 export const authService = {
-  login: async (email: string, password: string, isAdmin = false) => {
+  login: async (email: string, password: string) => {
     try {
       const response = await api.post('/auth/login/', { email, password });
       const { user, access, refresh } = response.data;

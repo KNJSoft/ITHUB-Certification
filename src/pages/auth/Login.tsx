@@ -25,9 +25,18 @@ export const Login: React.FC<LoginProps> = ({ isAdmin = false }) => {
     setError('');
     
     try {
-      const response = await authService.login(email, password, isAdmin);
+      const response = await authService.login(email, password);
       login(response.user as any, response.token);
-      navigate(isAdmin ? '/admin/dashboard' : '/app/dashboard');
+      
+      // Rediriger selon le rôle de l'utilisateur
+      const userRole = response.user.role;
+      if (userRole === 'admin') {
+        navigate('/admin/dashboard');
+      } else if (userRole === 'student') {
+        navigate('/app/dashboard');
+      } else {
+        setError('Rôle utilisateur non reconnu');
+      }
     } catch (err: any) {
       setError(err.message || 'Identifiants invalides');
     } finally {
@@ -130,12 +139,14 @@ export const Login: React.FC<LoginProps> = ({ isAdmin = false }) => {
           )}
           
           <div className="mt-8 pt-8 border-t border-[#334155]">
+            {/*
             <Link 
               to={isAdmin ? "/app/login" : "/admin/login"} 
               className="block w-full text-center text-xs uppercase tracking-widest font-bold text-[#64748b] hover:text-[#2563eb] transition-colors"
             >
               Switch to {isAdmin ? 'Student' : 'Admin'} portal
             </Link>
+           */}
           </div>
         </div>
       </motion.div>

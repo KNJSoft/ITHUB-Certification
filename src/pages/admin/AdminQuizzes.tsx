@@ -43,7 +43,7 @@ export const AdminQuizzes: React.FC = () => {
     }
   };
 
-  const filteredQuizzes = quizzes.filter(q => 
+  const filteredQuizzes = Array.isArray(quizzes) && quizzes.filter(q => 
     q.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
     q.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -111,7 +111,7 @@ export const AdminQuizzes: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#7c3aed05]">
-              {filteredQuizzes.map((quiz) => (
+              {Array.isArray(filteredQuizzes) && filteredQuizzes.map((quiz) => (
                 <tr key={quiz.id} className="group hover:bg-[#7c3aed05]/40 transition-all">
                   <td className="px-10 py-8">
                     <div className="flex items-center gap-5">
