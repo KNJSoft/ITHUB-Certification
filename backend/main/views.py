@@ -12,7 +12,7 @@ from drf_spectacular.types import OpenApiTypes
 from .models import User, Quiz, Question, Option, Attempt, Certification
 from .serializers import (
     UserRegistrationSerializer, UserUpdateSerializer, UserLoginSerializer, UserProfileSerializer,
-    QuizListSerializer, QuizDetailSerializer, QuizCreateSerializer, QuizAdminSerializer,
+    QuizListSerializer, QuizDetailSerializer, QuizCreateSerializer, QuizAdminSerializer, QuizAdminUpdateSerializer,
     AttemptSubmitSerializer, AttemptResultSerializer, CertificationSerializer,
     UserListSerializer, StatsSerializer
 )
@@ -382,30 +382,30 @@ def admin_stats(request):
 @extend_schema(
     tags=['Admin Portal'],
     summary='Activité récente',
-    description='Retourne les dernières certifications obtenues par les étudiants',
+    description='Retourne les dernières activités de la plateforme (certifications, quiz créés, utilisateurs inscrits)',
     responses={200: CertificationSerializer}
 )
 @api_view(['GET'])
 @permission_classes([IsAdmin])
 def recent_activity(request):
     # Permission class already ensures only admins can access
-    
-    # Get the 10 most recent certifications
+
+    activity_data = []
+
+    # Get recent certifications
     recent_certifications = Certification.objects.select_related(
         'user', 'quiz'
-    ).order_by('-obtained_date')[:10]
-    
-    # Format the response
-    activity_data = []
+    ).order_by('-obtained_date')[:5]
+
     for cert in recent_certifications:
-        # Get the latest attempt for this certification
         latest_attempt = Attempt.objects.filter(
             user=cert.user,
             quiz=cert.quiz
         ).order_by('-attempt_date').first()
-        
+
         activity_data.append({
             'id': cert.id,
+            'type': 'certification',
             'user_id': cert.user.id,
             'user_name': f"{cert.user.first_name} {cert.user.last_name}",
             'user_email': cert.user.email,
@@ -414,8 +414,53 @@ def recent_activity(request):
             'score': latest_attempt.score if latest_attempt else 0,
             'time_ago': calculate_time_ago(cert.obtained_date)
         })
-    
-    return Response(activity_data)
+
+    # Get recent quiz creations
+    recent_quizzes = Quiz.objects.order_by('-created_at')[:5]
+    for quiz in recent_quizzes:
+        activity_data.append({
+            'id': quiz.id,
+            'type': 'quiz_created',
+            'quiz_title': quiz.title,
+            'quiz_category': quiz.category,
+            'created_at': quiz.created_at,
+            'time_ago': calculate_time_ago(quiz.created_at)
+        })
+
+    # Get recent user registrations
+    recent_users = User.objects.filter(role='student').order_by('-created_at')[:5]
+    for user in recent_users:
+        activity_data.append({
+            'id': user.id,
+            'type': 'user_registered',
+            'user_name': f"{user.first_name} {user.last_name}",
+            'user_email': user.email,
+            'created_at': user.created_at,
+            'time_ago': calculate_time_ago(user.created_at)
+        })
+
+    # Get recent quiz attempts
+    recent_attempts = Attempt.objects.select_related(
+        'user', 'quiz'
+    ).order_by('-attempt_date')[:5]
+    for attempt in recent_attempts:
+        activity_data.append({
+            'id': attempt.id,
+            'type': 'quiz_attempt',
+            'user_name': f"{attempt.user.first_name} {attempt.user.last_name}",
+            'user_email': attempt.user.email,
+            'quiz_title': attempt.quiz.title,
+            'score': attempt.score,
+            'passed': attempt.passed,
+            'attempt_date': attempt.attempt_date,
+            'time_ago': calculate_time_ago(attempt.attempt_date)
+        })
+
+    # Sort all activities by date/time
+    activity_data.sort(key=lambda x: x.get('obtained_date') or x.get('created_at') or x.get('attempt_date'), reverse=True)
+
+    # Return only the 10 most recent activities
+    return Response(activity_data[:10])
 
 
 def calculate_time_ago(date):
@@ -568,10 +613,10 @@ class QuizAdminDetailView(APIView):
     def put(self, request, quiz_id):
         try:
             quiz = Quiz.objects.get(id=quiz_id)
-            serializer = QuizAdminSerializer(quiz, data=request.data, partial=True)
+            serializer = QuizAdminUpdateSerializer(quiz, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data)
+                return Response(QuizAdminSerializer(quiz).data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Quiz.DoesNotExist:
             return Response({'error': 'Quiz non trouvé'}, status=status.HTTP_404_NOT_FOUND)

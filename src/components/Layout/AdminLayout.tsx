@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
-import { LayoutDashboard, FileText, Users, Settings, LogOut, ShieldCheck, Mail } from 'lucide-react';
+import { LayoutDashboard, FileText, Users, Settings, LogOut, ShieldCheck, Mail, User, Activity } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { motion } from 'motion/react';
 
 export const AdminLayout: React.FC = () => {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -16,6 +17,7 @@ export const AdminLayout: React.FC = () => {
 
   const navItems = [
     { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
+    { name: 'Activité Récente', path: '/admin/activity', icon: Activity },
     { name: 'Gérer les Quiz', path: '/admin/quizzes', icon: FileText },
     { name: 'Utilisateurs', path: '/admin/users', icon: Users },
     { name: 'Paramètres', path: '/admin/settings', icon: Settings },
@@ -30,7 +32,7 @@ export const AdminLayout: React.FC = () => {
             <ShieldCheck size={26} className="text-white" />
           </div>
           <div>
-            <span className="font-black text-2xl tracking-tighter block leading-none">HUB</span>
+            <span className="font-black text-2xl tracking-tighter block leading-none">IT HUB</span>
             <span className="text-[10px] uppercase tracking-[0.3em] text-[#7c3aed] font-black">Control Panel</span>
           </div>
         </div>
@@ -63,10 +65,10 @@ export const AdminLayout: React.FC = () => {
           <div className="bg-[#7c3aed05] p-4 rounded-2xl border border-[#7c3aed15] mb-4">
              <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-lg bg-[#7c3aed] flex items-center justify-center font-black text-white shadow-lg">
-                  {user?.name?.[0]}
+                  {user?.first_name?.[0]}
                 </div>
                 <div className="overflow-hidden">
-                  <p className="text-xs font-black text-white truncate uppercase">{user?.name}</p>
+                  <p className="text-xs font-black text-white truncate uppercase">{user?.first_name} {user?.last_name}</p>
                   <p className="text-[9px] text-[#7c3aed] font-medium tracking-widest uppercase">System Admin</p>
                 </div>
              </div>
@@ -90,7 +92,7 @@ export const AdminLayout: React.FC = () => {
         {/* Admin Header */}
         <header className="h-20 border-b border-[#7c3aed15] sticky top-0 bg-[#0f172a]/90 backdrop-blur-xl z-40 px-8 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-black tracking-tight text-white uppercase">Panel Admin — IT HUB</h1>
+            <h1 className="text-xl font-black tracking-tight text-white uppercase">Panel Admin</h1>
             <div className="bg-red-500 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-lg animate-pulse">ADMIN</div>
           </div>
 
@@ -103,8 +105,11 @@ export const AdminLayout: React.FC = () => {
               </div>
             </div>
             <div className="h-8 w-px bg-[#7c3aed15] mx-4" />
-            <button className="bg-[#7c3aed] hover:bg-[#6d28d9] text-white px-5 py-2 rounded-lg text-xs font-black uppercase tracking-widest shadow-lg shadow-[#7c3aed]/20 transition-all active:scale-95">
-              Live View
+            <button
+              onClick={() => setIsProfileModalOpen(true)}
+              className="bg-[#7c3aed] hover:bg-[#6d28d9] text-white p-2 rounded-lg shadow-lg shadow-[#7c3aed]/20 transition-all active:scale-95"
+            >
+              <User size={20} />
             </button>
           </div>
         </header>
@@ -120,6 +125,65 @@ export const AdminLayout: React.FC = () => {
           </motion.div>
         </main>
       </div>
+
+      {/* Modal Profil Admin */}
+      {isProfileModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="bg-[#0a0f1d] border border-[#7c3aed30] w-full max-w-md rounded-[2.5rem] overflow-hidden shadow-2xl"
+          >
+            <div className="p-10 border-b border-[#7c3aed10] flex justify-between items-center bg-gradient-to-r from-[#7c3aed05] to-transparent">
+              <div>
+                <h2 className="text-2xl font-black text-white uppercase tracking-tight">Profil Admin</h2>
+                <p className="text-xs text-[#64748b] font-medium mt-1 uppercase tracking-widest">Mettez à jour vos informations</p>
+              </div>
+              <button
+                onClick={() => setIsProfileModalOpen(false)}
+                className="w-10 h-10 rounded-full bg-[#7c3aed10] text-[#7c3aed] flex items-center justify-center hover:bg-[#7c3aed] hover:text-white transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-10 space-y-6">
+              <div className="flex justify-center mb-6">
+                <div className="w-24 h-24 rounded-full bg-[#7c3aed] flex items-center justify-center font-black text-white text-4xl shadow-lg">
+                  {user?.first_name?.[0]}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-[#64748b] uppercase tracking-widest ml-1">Nom</label>
+                <input
+                  type="text"
+                  defaultValue={`${user?.first_name} ${user?.last_name}`}
+                  className="w-full bg-[#0f172a] border border-[#7c3aed10] px-6 py-4 rounded-2xl text-white font-bold focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-[#64748b] uppercase tracking-widest ml-1">Email</label>
+                <input
+                  type="email"
+                  defaultValue={user?.email}
+                  className="w-full bg-[#0f172a] border border-[#7c3aed10] px-6 py-4 rounded-2xl text-white font-bold focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40"
+                />
+              </div>
+
+              <div className="pt-6">
+                <button
+                  onClick={() => setIsProfileModalOpen(false)}
+                  className="w-full py-5 bg-[#7c3aed] text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-[#7c3aed]/20 hover:bg-[#6d28d9] transition-all active:scale-95"
+                >
+                  Enregistrer
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { adminService } from '../../api/services';
 import { AdminStats } from '../../api/types';
-import { Users, Award, TrendingUp, BarChart3, Zap, ChevronRight, UserPlus } from 'lucide-react';
+import { Users, Award, TrendingUp, BarChart3, Zap, ChevronRight, UserPlus, BookOpen, CheckCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '../../lib/utils';
 
@@ -126,11 +126,11 @@ export const AdminDashboard: React.FC = () => {
           <div className="flex items-center justify-between mb-10">
             <div>
               <h2 className="text-2xl font-black text-white tracking-tight uppercase">Activité Récente</h2>
-              <p className="text-xs text-[#64748b] font-medium mt-1">Dernières certifications obtenues par les étudiants.</p>
+              <p className="text-xs text-[#64748b] font-medium mt-1">Dernières activités de la plateforme (certifications, quiz créés, inscriptions, tentatives).</p>
             </div>
-            <button className="text-[10px] font-black text-[#7c3aed] uppercase tracking-widest hover:underline px-4 py-2 bg-[#7c3aed10] rounded-full">
-              Mapper tout
-            </button>
+            <Link to="/admin/activity"  className="text-[10px] font-black text-[#7c3aed] uppercase tracking-widest hover:underline px-4 py-2 bg-[#7c3aed10] rounded-full">
+              Voir tout
+            </Link>
           </div>
           
           <div className="space-y-6">
@@ -142,17 +142,46 @@ export const AdminDashboard: React.FC = () => {
               recentActivity.map((activity) => (
                 <div key={activity.id} className="flex items-center justify-between p-5 rounded-3xl bg-[#0f172a50] border border-[#7c3aed05] hover:border-[#7c3aed20] transition-all group">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#7c3aed] to-[#4f46e5] flex items-center justify-center font-black text-white shadow-lg group-hover:scale-110 transition-transform">
-                      {activity.user_name.charAt(0)}
+                    <div className={cn(
+                      "w-12 h-12 rounded-xl flex items-center justify-center font-black text-white shadow-lg group-hover:scale-110 transition-transform",
+                      activity.type === 'certification' && "bg-gradient-to-br from-[#7c3aed] to-[#4f46e5]",
+                      activity.type === 'quiz_created' && "bg-gradient-to-br from-emerald-500 to-green-600",
+                      activity.type === 'user_registered' && "bg-gradient-to-br from-blue-500 to-cyan-600",
+                      activity.type === 'quiz_attempt' && "bg-gradient-to-br from-amber-500 to-orange-600"
+                    )}>
+                      {activity.type === 'certification' && <Award size={20} />}
+                      {activity.type === 'quiz_created' && <BookOpen size={20} />}
+                      {activity.type === 'user_registered' && <UserPlus size={20} />}
+                      {activity.type === 'quiz_attempt' && <CheckCircle size={20} />}
                     </div>
                     <div>
-                      <p className="font-black text-white text-sm uppercase">{activity.user_name}</p>
-                      <p className="text-[10px] text-[#64748b] font-medium tracking-wider">A obtenu le badge {activity.quiz_title}</p>
+                      <p className="font-black text-white text-sm uppercase">
+                        {activity.type === 'certification' && activity.user_name}
+                        {activity.type === 'quiz_created' && 'Nouveau quiz créé'}
+                        {activity.type === 'user_registered' && activity.user_name}
+                        {activity.type === 'quiz_attempt' && activity.user_name}
+                      </p>
+                      <p className="text-[10px] text-[#64748b] font-medium tracking-wider">
+                        {activity.type === 'certification' && `A obtenu le badge ${activity.quiz_title}`}
+                        {activity.type === 'quiz_created' && `${activity.quiz_title} (${activity.quiz_category})`}
+                        {activity.type === 'user_registered' && `Nouvel étudiant inscrit: ${activity.user_email}`}
+                        {activity.type === 'quiz_attempt' && `Tentative: ${activity.quiz_title} - ${activity.passed ? 'Réussi' : 'Échoué'}`}
+                      </p>
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="text-[#64748b] text-[10px] font-mono">{activity.time_ago}</p>
-                    <p className="text-emerald-500 text-[10px] font-bold uppercase mt-1">Score: {activity.score}%</p>
+                    {activity.type === 'certification' && (
+                      <p className="text-emerald-500 text-[10px] font-bold uppercase mt-1">Score: {activity.score}%</p>
+                    )}
+                    {activity.type === 'quiz_attempt' && (
+                      <p className={cn(
+                        "text-[10px] font-bold uppercase mt-1",
+                        activity.passed ? "text-emerald-500" : "text-red-500"
+                      )}>
+                        Score: {activity.score}%
+                      </p>
+                    )}
                   </div>
                 </div>
               ))

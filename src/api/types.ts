@@ -44,6 +44,7 @@ export interface Quiz {
   created_at: string;
   questions_count?: number;
   attempts_count?: number;
+  questions?: Question[];
 }
 
 export interface QuizDetail extends Quiz {

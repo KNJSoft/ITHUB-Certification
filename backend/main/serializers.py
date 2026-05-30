@@ -70,7 +70,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class OptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Option
-        fields = ('id', 'text')
+        fields = ('id', 'text', 'is_correct')
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -85,7 +85,7 @@ class QuizListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quiz
         fields = ('id','title', 'description', 'category', 'difficulty', 'trainer_name',
-                 'timer_minutes', 'min_score_percentage', 'max_attempts', 'validity_hours', 'questions')
+                 'timer_minutes', 'min_score_percentage', 'max_attempts', 'validity_hours', 'questions','expiration_date','is_active')
 
     def to_representation(self, instance):
         # Only return active and non-expired quizzes
@@ -217,18 +217,52 @@ class UserListSerializer(serializers.ModelSerializer):
 class QuizAdminSerializer(serializers.ModelSerializer):
     questions_count = serializers.SerializerMethodField()
     attempts_count = serializers.SerializerMethodField()
+    questions = QuestionSerializer(many=True, read_only=True)
 
     class Meta:
         model = Quiz
         fields = ('id', 'title', 'description', 'category', 'difficulty', 'trainer_name',
                  'timer_minutes', 'min_score_percentage', 'max_attempts', 'validity_hours',
-                 'expiration_date', 'is_active', 'created_at', 'questions_count', 'attempts_count')
+                 'expiration_date', 'is_active', 'created_at', 'questions_count', 'attempts_count', 'questions')
 
     def get_questions_count(self, obj):
         return obj.questions.count()
 
     def get_attempts_count(self, obj):
         return obj.attempts.count()
+
+
+class QuizAdminUpdateSerializer(serializers.ModelSerializer):
+    questions = serializers.ListField(write_only=True, required=False)
+
+    class Meta:
+        model = Quiz
+        fields = ('title', 'description', 'category', 'difficulty', 'trainer_name',
+                 'timer_minutes', 'min_score_percentage', 'max_attempts', 'validity_hours', 'questions')
+
+    def update(self, instance, validated_data):
+        questions_data = validated_data.pop('questions', None)
+
+        # Mettre à jour les champs du quiz
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # Si des questions sont fournies, les mettre à jour
+        if questions_data is not None:
+            # Supprimer les questions existantes
+            instance.questions.all().delete()
+
+            # Créer les nouvelles questions
+            for i, question_data in enumerate(questions_data, 1):
+                options_data = question_data.pop('options', [])
+                question_data.pop('order', None)  # Supprimer order si présent pour éviter le conflit
+                question = Question.objects.create(quiz=instance, order=i, **question_data)
+
+                for option_data in options_data:
+                    Option.objects.create(question=question, **option_data)
+
+        return instance
 
 
 class StatsSerializer(serializers.Serializer):

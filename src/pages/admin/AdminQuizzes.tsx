@@ -11,6 +11,7 @@ export const AdminQuizzes: React.FC = () => {
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingQuiz, setEditingQuiz] = useState<Quiz | null>(null);
   const [newQuiz, setNewQuiz] = useState({
     title: '',
     category: '',
@@ -87,11 +88,100 @@ export const AdminQuizzes: React.FC = () => {
       // Recharger la liste des quiz
       const data = await quizService.getAdminQuizzes();
       setQuizzes(data);
-      
+
     } catch (err: any) {
       console.error('Erreur lors de la création du quiz:', err);
       console.error('Détails de l\'erreur:', err.response?.data);
       setError(err.message || 'Erreur lors de la création du quiz');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateQuiz = async () => {
+    if (!editingQuiz) return;
+    if (!newQuiz.title || !newQuiz.trainer_name || newQuiz.questions.length === 0) {
+      setError('Veuillez remplir le titre, le nom du formateur et ajouter au moins une question');
+      return;
+    }
+    setLoading(true);
+    try {
+      const quizData = {
+        title: newQuiz.title,
+        description: newQuiz.description,
+        category: newQuiz.category,
+        difficulty: newQuiz.difficulty,
+        trainer_name: newQuiz.trainer_name,
+        timer_minutes: newQuiz.timer_minutes,
+        min_score_percentage: newQuiz.min_score_percentage,
+        max_attempts: newQuiz.attemptsAllowed,
+        validity_hours: newQuiz.validity_hours,
+        questions: newQuiz.questions
+      };
+      console.log('Données envoyées au backend pour mise à jour:', quizData);
+      const result = await quizService.updateQuiz(editingQuiz.id, quizData);
+      console.log('Résultat du backend:', result);
+      setIsModalOpen(false);
+      setEditingQuiz(null);
+      setNewQuiz({
+        title: '',
+        category: '',
+        description: '',
+        attemptsAllowed: 2,
+        difficulty: 'medium',
+        trainer_name: '',
+        timer_minutes: 30,
+        min_score_percentage: 80,
+        validity_hours: 24,
+        questions: []
+      });
+      // Recharger la liste des quiz
+      const data = await quizService.getAdminQuizzes();
+      setQuizzes(data);
+
+    } catch (err: any) {
+      console.error('Erreur lors de la mise à jour du quiz:', err);
+      console.error('Détails de l\'erreur:', err.response?.data);
+      setError(err.message || 'Erreur lors de la mise à jour du quiz');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditQuiz = async (quiz: Quiz) => {
+    setLoading(true);
+    try {
+      // Récupérer les détails complets du quiz avec les questions
+      const quizDetails = await quizService.getAdminQuizById(quiz.id);
+      console.log('QuizDetails récupérés:', quizDetails);
+      setEditingQuiz(quizDetails);
+      setNewQuiz({
+        title: quizDetails.title,
+        category: quizDetails.category,
+        description: quizDetails.description,
+        attemptsAllowed: quizDetails.max_attempts,
+        difficulty: quizDetails.difficulty,
+        trainer_name: quizDetails.trainer_name,
+        timer_minutes: quizDetails.timer_minutes,
+        min_score_percentage: quizDetails.min_score_percentage,
+        validity_hours: quizDetails.validity_hours,
+        questions: quizDetails.questions || []
+      });
+      console.log('newQuiz après setNewQuiz:', {
+        title: quizDetails.title,
+        category: quizDetails.category,
+        description: quizDetails.description,
+        attemptsAllowed: quizDetails.max_attempts,
+        difficulty: quizDetails.difficulty,
+        trainer_name: quizDetails.trainer_name,
+        timer_minutes: quizDetails.timer_minutes,
+        min_score_percentage: quizDetails.min_score_percentage,
+        validity_hours: quizDetails.validity_hours,
+        questions: quizDetails.questions || []
+      });
+      setIsModalOpen(true);
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors de la récupération des détails du quiz');
     } finally {
       setLoading(false);
     }
@@ -128,8 +218,23 @@ export const AdminQuizzes: React.FC = () => {
           </div>
           <p className="text-[#64748b] font-medium tracking-wide mt-2">Créez et configurez vos examens de certification.</p>
         </div>
-        <button 
-          onClick={() => setIsModalOpen(true)}
+        <button
+          onClick={() => {
+            setEditingQuiz(null);
+            setNewQuiz({
+              title: '',
+              category: '',
+              description: '',
+              attemptsAllowed: 2,
+              difficulty: 'medium',
+              trainer_name: '',
+              timer_minutes: 30,
+              min_score_percentage: 80,
+              validity_hours: 24,
+              questions: []
+            });
+            setIsModalOpen(true);
+          }}
           className="flex items-center justify-center gap-3 bg-[#7c3aed] hover:bg-[#6d28d9] text-white px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-xl shadow-[#7c3aed]/20 group active:scale-95"
         >
           <Plus size={20} className="group-hover:rotate-90 transition-transform duration-300" />
@@ -208,10 +313,13 @@ export const AdminQuizzes: React.FC = () => {
                   </td>
                   <td className="px-10 py-8 text-right">
                     <div className="flex justify-end gap-3">
-                       <button className="p-3 bg-[#0a0f1d] hover:bg-[#7c3aed] text-[#64748b] hover:text-white rounded-xl border border-[#7c3aed10] transition-all shadow-sm">
+                       <button
+                        onClick={() => handleEditQuiz(quiz)}
+                        className="p-3 bg-[#0a0f1d] hover:bg-[#7c3aed] text-[#64748b] hover:text-white rounded-xl border border-[#7c3aed10] transition-all shadow-sm"
+                      >
                         <Edit2 size={18} />
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleDelete(quiz.id)}
                         className="p-3 bg-[#0a0f1d] hover:bg-red-500 text-[#64748b] hover:text-white rounded-xl border border-[#7c3aed10] transition-all shadow-sm"
                       >
@@ -236,8 +344,8 @@ export const AdminQuizzes: React.FC = () => {
           >
             <div className="p-10 border-b border-[#7c3aed10] flex justify-between items-center bg-gradient-to-r from-[#7c3aed05] to-transparent">
               <div>
-                <h2 className="text-2xl font-black text-white uppercase tracking-tight">Créer un Nouveau Quiz</h2>
-                <p className="text-xs text-[#64748b] font-medium mt-1 uppercase tracking-widest">Configurez les paramètres de certification</p>
+                <h2 className="text-2xl font-black text-white uppercase tracking-tight">{editingQuiz ? 'Modifier le Quiz' : 'Créer un Nouveau Quiz'}</h2>
+                <p className="text-xs text-[#64748b] font-medium mt-1 uppercase tracking-widest">{editingQuiz ? 'Mettez à jour les paramètres de certification' : 'Configurez les paramètres de certification'}</p>
               </div>
               <button 
                 onClick={() => setIsModalOpen(false)}
@@ -442,18 +550,18 @@ export const AdminQuizzes: React.FC = () => {
               </div>
 
               <div className="pt-6 flex gap-4">
-                <button 
+                <button
                   onClick={() => setIsModalOpen(false)}
                   className="flex-1 py-5 bg-[#0f172a] border border-[#7c3aed10] text-[#64748b] rounded-2xl font-black uppercase tracking-widest text-xs hover:border-[#7c3aed] transition-all"
                 >
                   Annuler
                 </button>
-                <button 
-                  onClick={handleCreateQuiz}
+                <button
+                  onClick={editingQuiz ? handleUpdateQuiz : handleCreateQuiz}
                   disabled={loading}
                   className="flex-[2] py-5 bg-[#7c3aed] text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-[#7c3aed]/20 hover:bg-[#6d28d9] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Création...' : 'Générer le Quiz'}
+                  {loading ? (editingQuiz ? 'Mise à jour...' : 'Création...') : (editingQuiz ? 'Mettre à jour le Quiz' : 'Générer le Quiz')}
                 </button>
               </div>
             </div>

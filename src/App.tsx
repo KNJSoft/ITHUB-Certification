@@ -17,6 +17,7 @@ import { Profile } from './pages/student/Profile';
 // Admin Portal
 import { AdminLayout } from './components/Layout/AdminLayout';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
+import { AdminActivity } from './pages/admin/AdminActivity';
 import { AdminQuizzes } from './pages/admin/AdminQuizzes';
 import { AdminUsers } from './pages/admin/AdminUsers';
 import { AdminSettings } from './pages/admin/Settings';
@@ -63,6 +64,7 @@ export default function App() {
         >
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="activity" element={<AdminActivity />} />
           <Route path="quizzes" element={<AdminQuizzes />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="settings" element={<AdminSettings />} />

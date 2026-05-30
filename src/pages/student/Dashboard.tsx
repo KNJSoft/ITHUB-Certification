@@ -105,7 +105,7 @@ export const Dashboard: React.FC = () => {
                     <p className="text-[10px] uppercase font-bold text-[#64748b] tracking-widest mb-1">Questions</p>
                     <div className="flex items-center gap-2 font-bold text-[#f8fafc]">
                       <BookOpen size={14} className="text-[#2563eb]" />
-                      <span>{quiz.questions_count || 'N/A'}</span>
+                      <span>{quiz?.questions.length || 'N/A'}</span>
                     </div>
                   </div>
                   <div className="bg-[#0f172a] rounded-2xl p-4 border border-[#334155]/50">
