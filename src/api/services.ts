@@ -1,5 +1,8 @@
 import api from './client';
 
+// --- get user token ---
+
+
 // --- Authentication Service ---
 export const authService = {
   login: async (email: string, password: string) => {
@@ -160,12 +163,48 @@ export const adminService = {
     }
   },
   
+  getRecentActivity: async () => {
+    try {
+      const response = await api.get('/admin/recent-activity/');
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la récupération de l\'activité récente');
+    }
+  },
+  
   getUsers: async () => {
     try {
       const response = await api.get('/admin/users/');
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Erreur lors de la récupération des utilisateurs');
+    }
+  },
+  
+  createUser: async (userData: any) => {
+    try {
+      const response = await api.post('/admin/users/create/', userData);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la création de l\'utilisateur');
+    }
+  },
+  
+  updateUser: async (userId: string, userData: any) => {
+    try {
+      const response = await api.patch(`/admin/users/${userId}/`, userData);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la mise à jour de l\'utilisateur');
+    }
+  },
+  
+  deleteUser: async (userId: string) => {
+    try {
+      await api.delete(`/admin/users/${userId}/delete/`);
+      return { success: true };
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la suppression de l\'utilisateur');
     }
   }
 };

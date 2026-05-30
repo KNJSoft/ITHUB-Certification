@@ -16,7 +16,12 @@ export const AdminQuizzes: React.FC = () => {
     category: '',
     description: '',
     attemptsAllowed: 2,
-    expiresAt: ''
+    difficulty: 'medium',
+    trainer_name: '',
+    timer_minutes: 30,
+    min_score_percentage: 80,
+    validity_hours: 24,
+    questions: [] as any[]
   });
 
   useEffect(() => {
@@ -24,6 +29,7 @@ export const AdminQuizzes: React.FC = () => {
       try {
         const data = await quizService.getAdminQuizzes();
         setQuizzes(data);
+        console.log('quiz',data)
       } catch (err: any) {
         setError(err.message || 'Erreur lors de la récupération des quiz');
       } finally {
@@ -43,7 +49,55 @@ export const AdminQuizzes: React.FC = () => {
     }
   };
 
-  const filteredQuizzes = Array.isArray(quizzes) && quizzes.filter(q => 
+  const handleCreateQuiz = async () => {
+    if (!newQuiz.title || !newQuiz.trainer_name || newQuiz.questions.length === 0) {
+      setError('Veuillez remplir le titre, le nom du formateur et ajouter au moins une question');
+      return;
+    }
+    setLoading(true);
+    try {
+      const quizData = {
+        title: newQuiz.title,
+        description: newQuiz.description,
+        category: newQuiz.category,
+        difficulty: newQuiz.difficulty,
+        trainer_name: newQuiz.trainer_name,
+        timer_minutes: newQuiz.timer_minutes,
+        min_score_percentage: newQuiz.min_score_percentage,
+        max_attempts: newQuiz.attemptsAllowed,
+        validity_hours: newQuiz.validity_hours,
+        questions: newQuiz.questions
+      };
+      console.log('Données envoyées au backend:', quizData);
+      const result = await quizService.createQuiz(quizData);
+      console.log('Résultat du backend:', result);
+      setIsModalOpen(false);
+      setNewQuiz({
+        title: '',
+        category: '',
+        description: '',
+        attemptsAllowed: 2,
+        difficulty: 'medium',
+        trainer_name: '',
+        timer_minutes: 30,
+        min_score_percentage: 80,
+        validity_hours: 24,
+        questions: []
+      });
+      // Recharger la liste des quiz
+      const data = await quizService.getAdminQuizzes();
+      setQuizzes(data);
+      
+    } catch (err: any) {
+      console.error('Erreur lors de la création du quiz:', err);
+      console.error('Détails de l\'erreur:', err.response?.data);
+      setError(err.message || 'Erreur lors de la création du quiz');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredQuizzes = Array.isArray(quizzes['results']) && quizzes['results'].filter(q => 
     q.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
     q.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -193,7 +247,7 @@ export const AdminQuizzes: React.FC = () => {
               </button>
             </div>
 
-            <div className="p-10 space-y-6">
+            <div className="p-10 space-y-6 max-h-[70vh] overflow-y-auto">
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-[#64748b] uppercase tracking-widest ml-1">Titre du Quiz</label>
@@ -221,6 +275,31 @@ export const AdminQuizzes: React.FC = () => {
                 </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-[#64748b] uppercase tracking-widest ml-1">Difficulté</label>
+                  <select 
+                    className="w-full bg-[#0f172a] border border-[#7c3aed10] px-6 py-4 rounded-2xl text-white font-bold focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40 appearance-none"
+                    value={newQuiz.difficulty}
+                    onChange={(e) => setNewQuiz({...newQuiz, difficulty: e.target.value})}
+                  >
+                    <option value="easy">Facile</option>
+                    <option value="medium">Moyen</option>
+                    <option value="hard">Difficile</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-[#64748b] uppercase tracking-widest ml-1">Formateur</label>
+                  <input 
+                    type="text" 
+                    placeholder="Nom du formateur"
+                    className="w-full bg-[#0f172a] border border-[#7c3aed10] px-6 py-4 rounded-2xl text-white font-bold focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40"
+                    value={newQuiz.trainer_name}
+                    onChange={(e) => setNewQuiz({...newQuiz, trainer_name: e.target.value})}
+                  />
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-[#64748b] uppercase tracking-widest ml-1">Description</label>
                 <textarea 
@@ -232,26 +311,134 @@ export const AdminQuizzes: React.FC = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-[#64748b] uppercase tracking-widest ml-1">Tentatives Autorisées</label>
+                  <label className="text-[10px] font-black text-[#64748b] uppercase tracking-widest ml-1">Durée (min)</label>
                   <input 
                     type="number" 
                     min="1"
                     className="w-full bg-[#0f172a] border border-[#7c3aed10] px-6 py-4 rounded-2xl text-white font-bold focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40"
-                    value={newQuiz.attemptsAllowed}
-                    onChange={(e) => setNewQuiz({...newQuiz, attemptsAllowed: parseInt(e.target.value)})}
+                    value={newQuiz.timer_minutes}
+                    onChange={(e) => setNewQuiz({...newQuiz, timer_minutes: parseInt(e.target.value)})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-[#64748b] uppercase tracking-widest ml-1">Date d'expiration</label>
+                  <label className="text-[10px] font-black text-[#64748b] uppercase tracking-widest ml-1">Score min (%)</label>
                   <input 
-                    type="date"
+                    type="number" 
+                    min="1" max="100"
                     className="w-full bg-[#0f172a] border border-[#7c3aed10] px-6 py-4 rounded-2xl text-white font-bold focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40"
-                    value={newQuiz.expiresAt}
-                    onChange={(e) => setNewQuiz({...newQuiz, expiresAt: e.target.value})}
+                    value={newQuiz.min_score_percentage}
+                    onChange={(e) => setNewQuiz({...newQuiz, min_score_percentage: parseInt(e.target.value)})}
                   />
                 </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-[#64748b] uppercase tracking-widest ml-1">Validité (h)</label>
+                  <input 
+                    type="number" 
+                    min="1"
+                    className="w-full bg-[#0f172a] border border-[#7c3aed10] px-6 py-4 rounded-2xl text-white font-bold focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40"
+                    value={newQuiz.validity_hours}
+                    onChange={(e) => setNewQuiz({...newQuiz, validity_hours: parseInt(e.target.value)})}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-[#64748b] uppercase tracking-widest ml-1">Tentatives Autorisées</label>
+                <input 
+                  type="number" 
+                  min="1"
+                  className="w-full bg-[#0f172a] border border-[#7c3aed10] px-6 py-4 rounded-2xl text-white font-bold focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40"
+                  value={newQuiz.attemptsAllowed}
+                  onChange={(e) => setNewQuiz({...newQuiz, attemptsAllowed: parseInt(e.target.value)})}
+                />
+              </div>
+
+              <div className="border-t border-[#7c3aed10] pt-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-sm font-black text-white uppercase tracking-widest">Questions ({newQuiz.questions.length})</h3>
+                  <button 
+                    onClick={() => {
+                      setNewQuiz({
+                        ...newQuiz,
+                        questions: [...newQuiz.questions, {
+                          text: '',
+                          options: [
+                            { text: '', is_correct: false },
+                            { text: '', is_correct: false },
+                            { text: '', is_correct: false },
+                            { text: '', is_correct: false }
+                          ]
+                        }]
+                      });
+                    }}
+                    className="px-4 py-2 bg-[#7c3aed] text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[#6d28d9] transition-all"
+                  >
+                    + Ajouter Question
+                  </button>
+                </div>
+
+                {newQuiz.questions.map((question, qIndex) => (
+                  <div key={qIndex} className="bg-[#0f172a] border border-[#7c3aed10] rounded-2xl p-6 mb-4">
+                    <div className="flex justify-between items-start mb-4">
+                      <label className="text-[10px] font-black text-[#64748b] uppercase tracking-widest">Question {qIndex + 1}</label>
+                      <button 
+                        onClick={() => {
+                          setNewQuiz({
+                            ...newQuiz,
+                            questions: newQuiz.questions.filter((_, i) => i !== qIndex)
+                          });
+                        }}
+                        className="text-red-500 hover:text-red-400 text-xs font-bold"
+                      >
+                        Supprimer
+                      </button>
+                    </div>
+                    <textarea
+                      rows={2}
+                      placeholder="Écrivez votre question ici..."
+                      className="w-full bg-[#0a0f1d] border border-[#7c3aed10] px-4 py-3 rounded-xl text-white font-bold focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40 resize-none mb-4"
+                      value={question.text}
+                      onChange={(e) => {
+                        const updatedQuestions = [...newQuiz.questions];
+                        updatedQuestions[qIndex].text = e.target.value;
+                        setNewQuiz({ ...newQuiz, questions: updatedQuestions });
+                      }}
+                    />
+                    <div className="space-y-3">
+                      {question.options.map((option, oIndex) => (
+                        <div key={oIndex} className="flex items-center gap-3">
+                          <input
+                            type="radio"
+                            name={`correct-${qIndex}`}
+                            checked={option.is_correct}
+                            onChange={() => {
+                              const updatedQuestions = [...newQuiz.questions];
+                              updatedQuestions[qIndex].options = updatedQuestions[qIndex].options.map((opt, i) => ({
+                                ...opt,
+                                is_correct: i === oIndex
+                              }));
+                              setNewQuiz({ ...newQuiz, questions: updatedQuestions });
+                            }}
+                            className="w-4 h-4 accent-[#7c3aed]"
+                          />
+                          <input
+                            type="text"
+                            placeholder={`Option ${oIndex + 1}`}
+                            className="flex-1 bg-[#0a0f1d] border border-[#7c3aed10] px-4 py-2 rounded-xl text-white font-bold focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40"
+                            value={option.text}
+                            onChange={(e) => {
+                              const updatedQuestions = [...newQuiz.questions];
+                              updatedQuestions[qIndex].options[oIndex].text = e.target.value;
+                              setNewQuiz({ ...newQuiz, questions: updatedQuestions });
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
 
               <div className="pt-6 flex gap-4">
@@ -262,9 +449,11 @@ export const AdminQuizzes: React.FC = () => {
                   Annuler
                 </button>
                 <button 
-                  className="flex-[2] py-5 bg-[#7c3aed] text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-[#7c3aed]/20 hover:bg-[#6d28d9] transition-all active:scale-95"
+                  onClick={handleCreateQuiz}
+                  disabled={loading}
+                  className="flex-[2] py-5 bg-[#7c3aed] text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-[#7c3aed]/20 hover:bg-[#6d28d9] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Générer le Quiz
+                  {loading ? 'Création...' : 'Générer le Quiz'}
                 </button>
               </div>
             </div>

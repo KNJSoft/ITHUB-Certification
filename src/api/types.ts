@@ -75,6 +75,10 @@ export interface AdminStats {
   total_attempts: number;
   total_certifications: number;
   success_rate: number;
+  users_growth: number;
+  quizzes_growth: number;
+  attempts_growth: number;
+  certifications_growth: number;
 }
 
 export interface UserListItem extends User {

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
+from django.utils import timezone
 from .models import User, Quiz, Question, Option, Attempt, Certification
 
 
@@ -11,7 +12,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'first_name', 'last_name', 'phone_number', 'country', 'country_code', 'password', 'password_confirm')
+        fields = ('email', 'first_name', 'last_name', 'phone_number', 'country', 'country_code', 'password', 'password_confirm', 'role')
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
@@ -22,6 +23,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         validated_data.pop('password_confirm')
         user = User.objects.create_user(**validated_data)
         return user
+
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('email', 'first_name', 'last_name', 'phone_number', 'country', 'country_code', 'role')
 
 
 class UserLoginSerializer(serializers.Serializer):
@@ -77,7 +84,8 @@ class QuestionSerializer(serializers.ModelSerializer):
 class QuizListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quiz
-        fields = ('id', 'title', 'description', 'category', 'difficulty', 'trainer_name', 'timer_minutes')
+        fields = ('id','title', 'description', 'category', 'difficulty', 'trainer_name',
+                 'timer_minutes', 'min_score_percentage', 'max_attempts', 'validity_hours', 'questions')
 
     def to_representation(self, instance):
         # Only return active and non-expired quizzes
@@ -109,8 +117,38 @@ class QuizCreateSerializer(serializers.ModelSerializer):
         fields = ('title', 'description', 'category', 'difficulty', 'trainer_name',
                  'timer_minutes', 'min_score_percentage', 'max_attempts', 'validity_hours', 'questions')
 
+    def validate_questions(self, value):
+        if not value:
+            raise serializers.ValidationError("Au moins une question est requise.")
+        
+        for question in value:
+            if not question.get('text'):
+                raise serializers.ValidationError("Chaque question doit avoir un texte.")
+            
+            if not question.get('options') or len(question['options']) < 2:
+                raise serializers.ValidationError("Chaque question doit avoir au moins 2 options.")
+            
+            has_correct = False
+            for option in question['options']:
+                if not option.get('text'):
+                    raise serializers.ValidationError("Chaque option doit avoir un texte.")
+                if option.get('is_correct'):
+                    has_correct = True
+            
+            if not has_correct:
+                raise serializers.ValidationError("Chaque question doit avoir une réponse correcte.")
+        
+        return value
+
     def create(self, validated_data):
+        from datetime import timedelta
         questions_data = validated_data.pop('questions')
+        
+        # Calculer la date d'expiration
+        validity_hours = validated_data.get('validity_hours', 24)
+        expiration_date = timezone.now() + timedelta(hours=validity_hours)
+        validated_data['expiration_date'] = expiration_date
+        
         quiz = Quiz.objects.create(**validated_data)
         
         for i, question_data in enumerate(questions_data, 1):
@@ -199,3 +237,7 @@ class StatsSerializer(serializers.Serializer):
     total_attempts = serializers.IntegerField()
     total_certifications = serializers.IntegerField()
     success_rate = serializers.FloatField()
+    users_growth = serializers.FloatField()
+    quizzes_growth = serializers.FloatField()
+    attempts_growth = serializers.FloatField()
+    certifications_growth = serializers.FloatField()

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { adminService } from '../../api/services';
 import { AdminStats } from '../../api/types';
 import { Users, Award, TrendingUp, BarChart3, Zap, ChevronRight, UserPlus } from 'lucide-react';
@@ -7,22 +8,27 @@ import { cn } from '../../lib/utils';
 
 export const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<AdminStats | null>(null);
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchData = async () => {
       try {
-        const data = await adminService.getStats();
-        setStats(data);
-        console.log(data)
+        const [statsData, activityData] = await Promise.all([
+          adminService.getStats(),
+          adminService.getRecentActivity()
+        ]);
+        setStats(statsData);
+        setRecentActivity(activityData);
       } catch (err: any) {
-        setError(err.message || 'Erreur lors de la récupération des statistiques');
+        setError(err.message || 'Erreur lors de la récupération des données');
       } finally {
         setLoading(false);
       }
     };
-    fetchStats();
+    fetchData();
   }, []);
 
   if (loading) return (
@@ -45,34 +51,34 @@ export const AdminDashboard: React.FC = () => {
     { 
       label: 'Total Inscrits', 
       value: stats?.total_users || 0, 
-      change: '+12%', 
+      change: stats?.users_growth ? `${stats.users_growth >= 0 ? '+' : ''}${stats.users_growth}%` : '+0%', 
       icon: Users, 
       color: 'bg-blue-500', 
-      trend: 'up' 
+      trend: (stats?.users_growth || 0) >= 0 ? 'up' : 'down' 
     },
     { 
       label: 'Quiz Actifs', 
       value: stats?.total_quizzes || 0, 
-      change: '+5%', 
+      change: stats?.quizzes_growth ? `${stats.quizzes_growth >= 0 ? '+' : ''}${stats.quizzes_growth}%` : '+0%', 
       icon: Award, 
       color: 'bg-emerald-500', 
-      trend: 'up' 
+      trend: (stats?.quizzes_growth || 0) >= 0 ? 'up' : 'down' 
     },
     { 
       label: 'Tentatives Quiz', 
       value: stats?.total_attempts || 0, 
-      change: '+18%', 
+      change: stats?.attempts_growth ? `${stats.attempts_growth >= 0 ? '+' : ''}${stats.attempts_growth}%` : '+0%', 
       icon: Zap, 
       color: 'bg-[#7c3aed]', 
-      trend: 'up' 
+      trend: (stats?.attempts_growth || 0) >= 0 ? 'up' : 'down' 
     },
     { 
       label: 'Certifications', 
       value: stats?.total_certifications || 0, 
-      change: '+8%', 
+      change: stats?.certifications_growth ? `${stats.certifications_growth >= 0 ? '+' : ''}${stats.certifications_growth}%` : '+0%', 
       icon: TrendingUp, 
       color: 'bg-amber-500', 
-      trend: 'up' 
+      trend: (stats?.certifications_growth || 0) >= 0 ? 'up' : 'down' 
     },
   ];
 
@@ -128,23 +134,29 @@ export const AdminDashboard: React.FC = () => {
           </div>
           
           <div className="space-y-6">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex items-center justify-between p-5 rounded-3xl bg-[#0f172a50] border border-[#7c3aed05] hover:border-[#7c3aed20] transition-all group">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#7c3aed] to-[#4f46e5] flex items-center justify-center font-black text-white shadow-lg group-hover:scale-110 transition-transform">
-                    {['J', 'A', 'M', 'S'][i-1]}
-                  </div>
-                  <div>
-                    <p className="font-black text-white text-sm uppercase">User_{i * 123}</p>
-                    <p className="text-[10px] text-[#64748b] font-medium tracking-wider">A obtenu le badge Azure Architecture</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-[#64748b] text-[10px] font-mono">Il y a {i * 15}m</p>
-                  <p className="text-emerald-500 text-[10px] font-bold uppercase mt-1">Score: {90 + i}%</p>
-                </div>
+            {recentActivity.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-[#64748b] font-medium">Aucune activité récente</p>
               </div>
-            ))}
+            ) : (
+              recentActivity.map((activity) => (
+                <div key={activity.id} className="flex items-center justify-between p-5 rounded-3xl bg-[#0f172a50] border border-[#7c3aed05] hover:border-[#7c3aed20] transition-all group">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#7c3aed] to-[#4f46e5] flex items-center justify-center font-black text-white shadow-lg group-hover:scale-110 transition-transform">
+                      {activity.user_name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="font-black text-white text-sm uppercase">{activity.user_name}</p>
+                      <p className="text-[10px] text-[#64748b] font-medium tracking-wider">A obtenu le badge {activity.quiz_title}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[#64748b] text-[10px] font-mono">{activity.time_ago}</p>
+                    <p className="text-emerald-500 text-[10px] font-bold uppercase mt-1">Score: {activity.score}%</p>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -153,7 +165,10 @@ export const AdminDashboard: React.FC = () => {
           <UserPlus size={48} className="text-white/20 mb-6" />
           <h2 className="text-3xl font-black tracking-tighter uppercase leading-tight mb-4">Besoin de plus de quiz ?</h2>
           <p className="text-white/80 font-medium mb-10 leading-relaxed">Générez instantanément un nouveau parcours de certification avec notre outil de création assistée.</p>
-          <button className="w-full py-5 bg-white text-[#7c3aed] rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl hover:-translate-y-1 transition-all active:scale-95">
+          <button 
+            onClick={() => navigate('/admin/quizzes')}
+            className="w-full py-5 bg-white text-[#7c3aed] rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl hover:-translate-y-1 transition-all active:scale-95"
+          >
             Créer un Quiz
           </button>
         </div>

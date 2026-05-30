@@ -23,6 +23,7 @@ export const QuizPage: React.FC = () => {
       try {
         const data = await quizService.getQuizById(id!);
         setQuiz(data);
+        console.log(data)
         setTimeLeft(data.timer_minutes * 60);
         setHasStarted(true);
       } catch (err: any) {

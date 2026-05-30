@@ -17,6 +17,7 @@ export const Dashboard: React.FC = () => {
       try {
         const data = await quizService.getQuizzes();
         setQuizzes(data);
+        console.log(data)
       } catch (err: any) {
         setError(err.message || 'Erreur lors de la récupération des quiz');
       } finally {
@@ -64,7 +65,7 @@ export const Dashboard: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-          {Array.isArray(quizzes) && quizzes.map((quiz, index) => {
+          {Array.isArray(quizzes['results']) && quizzes['results'].map((quiz, index) => {
             const expired = !quiz.is_active || isExpired(quiz.expiration_date);
             // Note: Le backend ne fournit pas attempts_remaining, on suppose max_attempts pour l'instant
             const attemptsRemaining = quiz.max_attempts - (quiz.attempts_count || 0);

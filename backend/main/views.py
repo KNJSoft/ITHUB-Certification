@@ -11,7 +11,7 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExampl
 from drf_spectacular.types import OpenApiTypes
 from .models import User, Quiz, Question, Option, Attempt, Certification
 from .serializers import (
-    UserRegistrationSerializer, UserLoginSerializer, UserProfileSerializer,
+    UserRegistrationSerializer, UserUpdateSerializer, UserLoginSerializer, UserProfileSerializer,
     QuizListSerializer, QuizDetailSerializer, QuizCreateSerializer, QuizAdminSerializer,
     AttemptSubmitSerializer, AttemptResultSerializer, CertificationSerializer,
     UserListSerializer, StatsSerializer
@@ -337,16 +337,107 @@ def admin_stats(request):
         passed_attempts = Attempt.objects.filter(passed=True).count()
         success_rate = round((passed_attempts / total_attempts) * 100, 2)
     
+    # Calculate growth percentages (compare with 30 days ago)
+    from datetime import timedelta
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    
+    users_30_days_ago = User.objects.filter(role='student', created_at__lt=thirty_days_ago).count()
+    quizzes_30_days_ago = Quiz.objects.filter(created_at__lt=thirty_days_ago).count()
+    attempts_30_days_ago = Attempt.objects.filter(attempt_date__lt=thirty_days_ago).count()
+    certifications_30_days_ago = Certification.objects.filter(obtained_date__lt=thirty_days_ago).count()
+    
+    # Calculate growth percentages
+    users_growth = 0
+    if users_30_days_ago > 0:
+        users_growth = round(((total_users - users_30_days_ago) / users_30_days_ago) * 100, 1)
+    
+    quizzes_growth = 0
+    if quizzes_30_days_ago > 0:
+        quizzes_growth = round(((total_quizzes - quizzes_30_days_ago) / quizzes_30_days_ago) * 100, 1)
+    
+    attempts_growth = 0
+    if attempts_30_days_ago > 0:
+        attempts_growth = round(((total_attempts - attempts_30_days_ago) / attempts_30_days_ago) * 100, 1)
+    
+    certifications_growth = 0
+    if certifications_30_days_ago > 0:
+        certifications_growth = round(((total_certifications - certifications_30_days_ago) / certifications_30_days_ago) * 100, 1)
+    
     data = {
         'total_users': total_users,
         'total_quizzes': total_quizzes,
         'total_attempts': total_attempts,
         'total_certifications': total_certifications,
-        'success_rate': success_rate
+        'success_rate': success_rate,
+        'users_growth': users_growth,
+        'quizzes_growth': quizzes_growth,
+        'attempts_growth': attempts_growth,
+        'certifications_growth': certifications_growth
     }
     
     serializer = StatsSerializer(data)
     return Response(serializer.data)
+
+
+@extend_schema(
+    tags=['Admin Portal'],
+    summary='Activité récente',
+    description='Retourne les dernières certifications obtenues par les étudiants',
+    responses={200: CertificationSerializer}
+)
+@api_view(['GET'])
+@permission_classes([IsAdmin])
+def recent_activity(request):
+    # Permission class already ensures only admins can access
+    
+    # Get the 10 most recent certifications
+    recent_certifications = Certification.objects.select_related(
+        'user', 'quiz'
+    ).order_by('-obtained_date')[:10]
+    
+    # Format the response
+    activity_data = []
+    for cert in recent_certifications:
+        # Get the latest attempt for this certification
+        latest_attempt = Attempt.objects.filter(
+            user=cert.user,
+            quiz=cert.quiz
+        ).order_by('-attempt_date').first()
+        
+        activity_data.append({
+            'id': cert.id,
+            'user_id': cert.user.id,
+            'user_name': f"{cert.user.first_name} {cert.user.last_name}",
+            'user_email': cert.user.email,
+            'quiz_title': cert.quiz.title,
+            'obtained_date': cert.obtained_date,
+            'score': latest_attempt.score if latest_attempt else 0,
+            'time_ago': calculate_time_ago(cert.obtained_date)
+        })
+    
+    return Response(activity_data)
+
+
+def calculate_time_ago(date):
+    """Calculate human-readable time ago string"""
+    from datetime import timedelta
+    now = timezone.now()
+    diff = now - date
+    
+    if diff < timedelta(minutes=1):
+        return "À l'instant"
+    elif diff < timedelta(hours=1):
+        minutes = int(diff.total_seconds() / 60)
+        return f"Il y a {minutes}m"
+    elif diff < timedelta(days=1):
+        hours = int(diff.total_seconds() / 3600)
+        return f"Il y a {hours}h"
+    elif diff < timedelta(days=7):
+        days = diff.days
+        return f"Il y a {days}j"
+    else:
+        weeks = diff.days // 7
+        return f"Il y a {weeks} sem."
 
 
 @extend_schema(
@@ -360,7 +451,65 @@ class UserListView(ListAPIView):
     permission_classes = [IsAdmin]
 
     def get_queryset(self):
-        return User.objects.filter(role='student').order_by('-created_at')
+        return User.objects.order_by('-created_at')
+
+
+@extend_schema(
+    tags=['Admin Portal'],
+    summary='Créer un utilisateur',
+    description='Crée un nouvel utilisateur étudiant',
+    request=UserRegistrationSerializer,
+    responses={201: UserListSerializer}
+)
+class UserCreateView(APIView):
+    permission_classes = [IsAdmin]
+
+    def post(self, request):
+        serializer = UserRegistrationSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response(UserListSerializer(user).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@extend_schema(
+    tags=['Admin Portal'],
+    summary='Mettre à jour un utilisateur',
+    description='Met à jour les informations d\'un utilisateur',
+    request=UserUpdateSerializer,
+    responses={200: UserListSerializer}
+)
+class UserUpdateView(APIView):
+    permission_classes = [IsAdmin]
+
+    def patch(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            serializer = UserUpdateSerializer(user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(UserListSerializer(user).data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            return Response({'error': 'Utilisateur non trouvé'}, status=status.HTTP_404_NOT_FOUND)
+
+
+@extend_schema(
+    tags=['Admin Portal'],
+    summary='Supprimer un utilisateur',
+    description='Supprime un utilisateur de la plateforme',
+    responses={204: {'description': 'Utilisateur supprimé avec succès'}}
+)
+class UserDeleteView(APIView):
+    permission_classes = [IsAdmin]
+
+    def delete(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            user.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except User.DoesNotExist:
+            return Response({'error': 'Utilisateur non trouvé'}, status=status.HTTP_404_NOT_FOUND)
 
 
 @extend_schema(

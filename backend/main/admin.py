@@ -8,6 +8,23 @@ class UserAdmin(admin.ModelAdmin):
     list_filter = ('role', 'is_active', 'created_at')
     search_fields = ('email', 'first_name', 'last_name')
     ordering = ('-created_at',)
+    readonly_fields = ('created_at', 'updated_at')
+    
+    fieldsets = (
+        (None, {'fields': ('email', 'password')}),
+        ('Personal info', {'fields': ('first_name', 'last_name', 'phone_number', 'country', 'country_code', 'profile_image')}),
+        ('Permissions', {'fields': ('role', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Important dates', {'fields': ('last_login', 'date_joined', 'created_at', 'updated_at')}),
+    )
+    
+    def save_model(self, request, obj, form, change):
+        if not change:  # Si c'est un nouvel utilisateur
+            obj.set_password(obj.password)
+        else:
+            # Si c'est une modification, ne changer le mot de passe que s'il a été modifié
+            if 'password' in form.changed_data:
+                obj.set_password(obj.password)
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(Quiz)
