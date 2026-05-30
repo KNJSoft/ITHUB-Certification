@@ -143,6 +143,7 @@ class QuizListView(ListAPIView):
 class QuizDetailView(RetrieveAPIView):
     serializer_class = QuizDetailSerializer
     permission_classes = [IsStudent]
+    lookup_field = 'id'
 
     def get_queryset(self):
         return Quiz.objects.filter(is_active=True, expiration_date__gt=timezone.now())
@@ -168,9 +169,9 @@ class QuizDetailView(RetrieveAPIView):
 class QuizAttemptView(APIView):
     permission_classes = [IsStudent]
 
-    def post(self, request, quiz_id):
+    def post(self, request, id):
         try:
-            quiz = Quiz.objects.get(id=quiz_id)
+            quiz = Quiz.objects.get(id=id)
             
             # Permission class already ensures only students can access
             
@@ -238,7 +239,11 @@ class QuizAttemptView(APIView):
                 )
                 # Generate PNG and PDF files for new certification
                 if created:
-                    generate_certification_files(certification)
+                    print(f"Génération des fichiers pour certification {certification.id}")
+                    files_generated = generate_certification_files(certification)
+                    print(f"Fichiers générés: {files_generated}")
+                    if not files_generated:
+                        print("Erreur lors de la génération des fichiers de certification")
             
             # Calculate remaining attempts
             remaining_attempts = max(0, quiz.max_attempts - (attempt_count + 1))
@@ -341,27 +346,28 @@ def admin_stats(request):
     from datetime import timedelta
     thirty_days_ago = timezone.now() - timedelta(days=30)
     
-    users_30_days_ago = User.objects.filter(role='student', created_at__lt=thirty_days_ago).count()
-    quizzes_30_days_ago = Quiz.objects.filter(created_at__lt=thirty_days_ago).count()
-    attempts_30_days_ago = Attempt.objects.filter(attempt_date__lt=thirty_days_ago).count()
-    certifications_30_days_ago = Certification.objects.filter(obtained_date__lt=thirty_days_ago).count()
+    # Count items created in the last 30 days
+    users_last_30_days = User.objects.filter(role='student', created_at__gte=thirty_days_ago).count()
+    quizzes_last_30_days = Quiz.objects.filter(created_at__gte=thirty_days_ago).count()
+    attempts_last_30_days = Attempt.objects.filter(attempt_date__gte=thirty_days_ago).count()
+    certifications_last_30_days = Certification.objects.filter(obtained_date__gte=thirty_days_ago).count()
     
-    # Calculate growth percentages
+    # Calculate growth percentages based on items created in last 30 days
     users_growth = 0
-    if users_30_days_ago > 0:
-        users_growth = round(((total_users - users_30_days_ago) / users_30_days_ago) * 100, 1)
+    if total_users > 0:
+        users_growth = round((users_last_30_days / total_users) * 100, 1)
     
     quizzes_growth = 0
-    if quizzes_30_days_ago > 0:
-        quizzes_growth = round(((total_quizzes - quizzes_30_days_ago) / quizzes_30_days_ago) * 100, 1)
+    if total_quizzes > 0:
+        quizzes_growth = round((quizzes_last_30_days / total_quizzes) * 100, 1)
     
     attempts_growth = 0
-    if attempts_30_days_ago > 0:
-        attempts_growth = round(((total_attempts - attempts_30_days_ago) / attempts_30_days_ago) * 100, 1)
+    if total_attempts > 0:
+        attempts_growth = round((attempts_last_30_days / total_attempts) * 100, 1)
     
     certifications_growth = 0
-    if certifications_30_days_ago > 0:
-        certifications_growth = round(((total_certifications - certifications_30_days_ago) / certifications_30_days_ago) * 100, 1)
+    if total_certifications > 0:
+        certifications_growth = round((certifications_last_30_days / total_certifications) * 100, 1)
     
     data = {
         'total_users': total_users,

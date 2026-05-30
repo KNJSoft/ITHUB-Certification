@@ -2,7 +2,7 @@ from PIL import Image, ImageDraw, ImageFont
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib.units import inch
-from reportlab.lib.colors import black, darkblue
+from reportlab.lib.colors import darkblue
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 import io
@@ -26,6 +26,7 @@ def generate_certification_png(certification):
     # Couleurs
     dark_blue = (0, 51, 102)
     gold = (255, 215, 0)
+    black = (0, 0, 0)
     
     # Essayer de charger des polices, utiliser des polices par défaut si non disponibles
     try:
@@ -163,6 +164,10 @@ def generate_certification_files(certification):
     """
     Génère les fichiers PNG et PDF pour une certification
     """
-    generate_certification_png(certification)
-    generate_certification_pdf(certification)
-    return certification
+    try:
+        generate_certification_png(certification)
+        generate_certification_pdf(certification)
+        return True
+    except Exception as e:
+        print(f"Erreur lors de la génération des fichiers de certification: {e}")
+        return False

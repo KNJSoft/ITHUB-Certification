@@ -16,8 +16,8 @@ urlpatterns = [
     
     # Quiz (Student)
     path('quizzes/', QuizListView.as_view(), name='quiz_list'),
-    path('quizzes/<uuid:quiz_id>/', QuizDetailView.as_view(), name='quiz_detail'),
-    path('quizzes/<uuid:quiz_id>/attempt/', QuizAttemptView.as_view(), name='quiz_attempt'),
+    path('quizzes/<uuid:id>/', QuizDetailView.as_view(), name='quiz_detail'),
+    path('quizzes/<uuid:id>/attempt/', QuizAttemptView.as_view(), name='quiz_attempt'),
     
     # Certifications (Student)
     path('certifications/', CertificationListView.as_view(), name='certification_list'),

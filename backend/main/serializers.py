@@ -82,10 +82,18 @@ class QuestionSerializer(serializers.ModelSerializer):
 
 
 class QuizListSerializer(serializers.ModelSerializer):
+    attempts_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Quiz
         fields = ('id','title', 'description', 'category', 'difficulty', 'trainer_name',
-                 'timer_minutes', 'min_score_percentage', 'max_attempts', 'validity_hours', 'questions','expiration_date','is_active')
+                 'timer_minutes', 'min_score_percentage', 'max_attempts', 'validity_hours', 'questions','expiration_date','is_active', 'attempts_count')
+
+    def get_attempts_count(self, obj):
+        request = self.context.get('request')
+        if request and request.user:
+            return obj.attempts.filter(user=request.user).count()
+        return 0
 
     def to_representation(self, instance):
         # Only return active and non-expired quizzes

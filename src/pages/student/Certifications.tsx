@@ -18,6 +18,7 @@ export const Certifications: React.FC = () => {
       try {
         const data = await studentService.getCertifications();
         setCerts(data);
+        console.log(data);
       } catch (err: any) {
         setError(err.message || 'Erreur lors de la récupération des attestations');
       } finally {
@@ -108,7 +109,7 @@ export const Certifications: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {Array.isArray(certs) && certs.map((cert, idx) => (
+          {Array.isArray(certs['results']) && certs['results'].map((cert, idx) => (
             <motion.div
               key={cert.id}
               initial={{ opacity: 0, y: 20 }}

@@ -139,7 +139,7 @@ export const AdminDashboard: React.FC = () => {
                 <p className="text-[#64748b] font-medium">Aucune activité récente</p>
               </div>
             ) : (
-              recentActivity.map((activity) => (
+              recentActivity.slice(0, 3).map((activity) => (
                 <div key={activity.id} className="flex items-center justify-between p-5 rounded-3xl bg-[#0f172a50] border border-[#7c3aed05] hover:border-[#7c3aed20] transition-all group">
                   <div className="flex items-center gap-4">
                     <div className={cn(
