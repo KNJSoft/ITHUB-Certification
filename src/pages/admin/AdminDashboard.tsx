@@ -15,6 +15,7 @@ export const AdminDashboard: React.FC = () => {
       try {
         const data = await adminService.getStats();
         setStats(data);
+        console.log(data)
       } catch (err: any) {
         setError(err.message || 'Erreur lors de la récupération des statistiques');
       } finally {
@@ -119,7 +120,7 @@ export const AdminDashboard: React.FC = () => {
           <div className="flex items-center justify-between mb-10">
             <div>
               <h2 className="text-2xl font-black text-white tracking-tight uppercase">Activité Récente</h2>
-              <p className="text-xs text-[#64748b] font-medium mt-1">Dernières certifications obtenues par les élèves.</p>
+              <p className="text-xs text-[#64748b] font-medium mt-1">Dernières certifications obtenues par les étudiants.</p>
             </div>
             <button className="text-[10px] font-black text-[#7c3aed] uppercase tracking-widest hover:underline px-4 py-2 bg-[#7c3aed10] rounded-full">
               Mapper tout

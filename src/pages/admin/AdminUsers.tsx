@@ -16,6 +16,7 @@ export const AdminUsers: React.FC = () => {
       try {
         const data = await adminService.getUsers();
         setUsers(data);
+        console.log(data)
       } catch (err: any) {
         setError(err.message || 'Erreur lors de la récupération des utilisateurs');
       } finally {
@@ -25,11 +26,11 @@ export const AdminUsers: React.FC = () => {
     fetchUsers();
   }, []);
 
-  const filteredUsers =Array.isArray(users) && users.filter(u => 
+  const filteredUsers =Array.isArray(users['results']) && users['results'].filter(u => 
     `${u.first_name} ${u.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) || 
     u.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
+  console.log('filteredUsers:',filteredUsers)
   if (loading) return (
      <div className="flex items-center justify-center h-[60vh]">
         <div className="w-12 h-12 border-4 border-[#7c3aed] border-t-transparent rounded-full animate-spin" />
