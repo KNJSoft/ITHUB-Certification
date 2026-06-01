@@ -21,7 +21,9 @@ export const AdminUsers: React.FC = () => {
     country_code: '',
     password: '',
     password_confirm: '',
-    role: 'student'
+    role: 'student',
+    is_verified: false,
+    is_active: true
   });
 
   useEffect(() => {
@@ -62,7 +64,9 @@ export const AdminUsers: React.FC = () => {
         country_code: '',
         password: '',
         password_confirm: '',
-        role: 'student'
+        role: 'student',
+        is_verified: false,
+        is_active: true
       });
       // Recharger la liste des utilisateurs
       const data = await adminService.getUsers();
@@ -78,7 +82,26 @@ export const AdminUsers: React.FC = () => {
     if (!editingUser) return;
     setLoading(true);
     try {
-      const result = await adminService.updateUser(editingUser.id, newUser);
+      // Créer un objet avec seulement les champs nécessaires pour la mise à jour
+      const updateData: any = {
+        email: newUser.email,
+        first_name: newUser.first_name,
+        last_name: newUser.last_name,
+        phone_number: newUser.phone_number,
+        country: newUser.country,
+        country_code: newUser.country_code,
+        role: newUser.role,
+        is_verified: newUser.is_verified,
+        is_active: newUser.is_active
+      };
+
+      // N'inclure le mot de passe que s'il est fourni
+      if (newUser.password && newUser.password.trim() !== '') {
+        updateData.password = newUser.password;
+        updateData.password_confirm = newUser.password_confirm;
+      }
+
+      const result = await adminService.updateUser(editingUser.id, updateData);
       console.log(result);
       setIsModalOpen(false);
       setEditingUser(null);
@@ -91,7 +114,9 @@ export const AdminUsers: React.FC = () => {
         country_code: '',
         password: '',
         password_confirm: '',
-        role: 'student'
+        role: 'student',
+        is_verified: false,
+        is_active: true
       });
       // Recharger la liste des utilisateurs
       const data = await adminService.getUsers();
@@ -127,7 +152,9 @@ export const AdminUsers: React.FC = () => {
       country_code: user.country_code || '',
       password: '',
       password_confirm: '',
-      role: user.role || 'student'
+      role: user.role || 'student',
+      is_verified: user.is_verified || false,
+      is_active: user.is_active !== undefined ? user.is_active : true
     });
     setIsModalOpen(true);
   };
@@ -175,7 +202,9 @@ export const AdminUsers: React.FC = () => {
               country_code: '',
               password: '',
               password_confirm: '',
-              role: 'student'
+              role: 'student',
+              is_verified: false,
+              is_active: true
             });
             setIsModalOpen(true);
           }}
@@ -376,6 +405,35 @@ export const AdminUsers: React.FC = () => {
                   <option value="admin">Admin</option>
                 </select>
               </div>
+
+              {editingUser && (
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="flex items-center gap-3 p-4 bg-[#0f172a] border border-[#7c3aed10] rounded-2xl">
+                    <input
+                      type="checkbox"
+                      id="is_verified"
+                      checked={newUser.is_verified}
+                      onChange={(e) => setNewUser({...newUser, is_verified: e.target.checked})}
+                      className="w-5 h-5 rounded border-[#7c3aed10] text-[#7c3aed] focus:ring-[#7c3aed]/40"
+                    />
+                    <label htmlFor="is_verified" className="text-sm font-bold text-[#f8fafc]">
+                      Email vérifié
+                    </label>
+                  </div>
+                  <div className="flex items-center gap-3 p-4 bg-[#0f172a] border border-[#7c3aed10] rounded-2xl">
+                    <input
+                      type="checkbox"
+                      id="is_active"
+                      checked={newUser.is_active}
+                      onChange={(e) => setNewUser({...newUser, is_active: e.target.checked})}
+                      className="w-5 h-5 rounded border-[#7c3aed10] text-[#7c3aed] focus:ring-[#7c3aed]/40"
+                    />
+                    <label htmlFor="is_active" className="text-sm font-bold text-[#f8fafc]">
+                      Compte actif
+                    </label>
+                  </div>
+                </div>
+              )}
 
               {!editingUser && (
                 <>

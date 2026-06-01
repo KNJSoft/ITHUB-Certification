@@ -264,7 +264,7 @@ export const AdminQuizzes: React.FC = () => {
                 <th className="px-8 py-6 border-b border-[#7c3aed10]">Catégorie</th>
                 <th className="px-8 py-6 border-b border-[#7c3aed10] text-center">Expiration</th>
                 <th className="px-8 py-6 border-b border-[#7c3aed10] text-center">Essais</th>
-                <th className="px-8 py-6 border-b border-[#7c3aed10] text-center">Certifiés</th>
+                <th className="px-8 py-6 border-b border-[#7c3aed10] text-center">Tentatives</th>
                 <th className="px-8 py-6 border-b border-[#7c3aed10] text-center">Actif</th>
                 <th className="px-10 py-6 border-b border-[#7c3aed10] text-right">Actions</th>
               </tr>

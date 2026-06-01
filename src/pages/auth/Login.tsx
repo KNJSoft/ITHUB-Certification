@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { authService } from '../../api/services';
-import { Lock, Mail, Loader2, Code2, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Lock, Mail, Loader2, Code2, ShieldCheck, ArrowRight, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '../../lib/utils';
+import { useRateLimit } from '../../hooks/useRateLimit';
 
 interface LoginProps {
   isAdmin?: boolean;
@@ -18,27 +19,52 @@ export const Login: React.FC<LoginProps> = ({ isAdmin = false }) => {
   
   const login = useAuthStore(state => state.login);
   const navigate = useNavigate();
+  const rateLimit = useRateLimit('login');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    
+
     try {
-      const response = await authService.login(email, password);
-      login(response.user as any, response.token);
-      
-      // Rediriger selon le rôle de l'utilisateur
-      const userRole = response.user.role;
-      if (userRole === 'admin') {
-        navigate('/admin/dashboard');
-      } else if (userRole === 'student') {
-        navigate('/app/dashboard');
-      } else {
-        setError('Rôle utilisateur non reconnu');
+      const response: any = await authService.login(email, password);
+
+      // Vérifier si l'email n'est pas vérifié
+      if (!response.email_verified && response.redirect_to) {
+        setError(response.message || 'Email non vérifié. Un nouveau code de vérification a été envoyé.');
+        // Rediriger vers la page de vérification après un court délai
+        setTimeout(() => {
+          navigate(`${response.redirect_to}?email=${encodeURIComponent(email)}`);
+        }, 2000);
+        return;
       }
-    } catch (err: any) {
-      setError(err.message || 'Identifiants invalides');
+
+      login(response.user as any, response.token);
+
+      // Enregistrer la tentative réussie
+      rateLimit.recordAttempt(true);
+
+      // Rediriger selon le rôle de l'utilisateur
+      console.log(response);
+      
+        const userRole = response.user.role;
+        if (userRole === 'admin') {
+          navigate('/admin/dashboard');
+        } else if (userRole === 'student') {
+          navigate('/app/dashboard');
+        } else {
+          setError('Rôle utilisateur non reconnu');
+        }
+      
+      } catch (err: any) {
+      // Enregistrer la tentative échouée
+      rateLimit.recordAttempt(false);
+
+      if (err.message.includes('Trop de requêtes')) {
+        setError('Trop de tentatives. Veuillez attendre quelques instants.');
+      } else {
+        setError(err.message || 'Identifiants invalides');
+      }
     } finally {
       setLoading(false);
     }
@@ -59,15 +85,15 @@ export const Login: React.FC<LoginProps> = ({ isAdmin = false }) => {
         <div className="text-center mb-8">
           <div className={cn(
             "w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-xl",
-            isAdmin ? "bg-white text-[#2563eb]" : "bg-[#2563eb] text-white"
+            "bg-[#2563eb] text-white"
           )}>
-            {isAdmin ? <ShieldCheck size={32} /> : <Code2 size={32} />}
+            <Code2 size={32} />
           </div>
           <h1 className="text-3xl font-bold text-[#f8fafc] tracking-tight">
-            {isAdmin ? 'Admin Portal' : 'Student Portal'}
+            Authentification
           </h1>
           <p className="text-[#94a3b8] mt-2">
-            Welcome back to IT HUB Certification
+            Bienvenue sur IT HUB
           </p>
         </div>
 
@@ -76,6 +102,13 @@ export const Login: React.FC<LoginProps> = ({ isAdmin = false }) => {
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-3 rounded-xl text-sm font-medium">
                 {error}
+              </div>
+            )}
+
+            {rateLimit.isBlocked && (
+              <div className="bg-amber-500/10 border border-amber-500/20 text-amber-500 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2">
+                <AlertCircle size={16} />
+                <span>Trop de tentatives. Réessayez dans {rateLimit.getTimeRemaining()} secondes.</span>
               </div>
             )}
 
@@ -113,16 +146,25 @@ export const Login: React.FC<LoginProps> = ({ isAdmin = false }) => {
               </div>
             </div>
 
+            <div className="text-right">
+              <Link 
+                to="/app/forgot-password" 
+                className="text-sm text-[#2563eb] hover:underline"
+              >
+                Mot de passe oublié ?
+              </Link>
+            </div>
+
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || rateLimit.isBlocked}
               className="w-full bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold py-3.5 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:scale-100 shadow-lg shadow-[#2563eb]/20"
             >
               {loading ? (
                 <Loader2 className="animate-spin" size={20} />
               ) : (
                 <>
-                  <span>Sign In</span>
+                  <span>Connexion</span>
                   <ArrowRight size={18} />
                 </>
               )}
@@ -131,9 +173,9 @@ export const Login: React.FC<LoginProps> = ({ isAdmin = false }) => {
 
           {!isAdmin && (
             <div className="mt-8 text-center text-[#94a3b8]">
-                Don't have an account?{' '}
+                Pas de compte?{' '}
                 <Link to="/app/register" className="text-[#2563eb] font-bold hover:underline">
-                  Sign up now
+                  S'inscrire
                 </Link>
             </div>
           )}

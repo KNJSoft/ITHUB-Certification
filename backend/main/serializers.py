@@ -28,7 +28,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('email', 'first_name', 'last_name', 'phone_number', 'country', 'country_code', 'role')
+        fields = ('email', 'first_name', 'last_name', 'phone_number', 'country', 'country_code', 'role', 'is_verified', 'is_active')
 
 
 class UserLoginSerializer(serializers.Serializer):
@@ -208,7 +208,7 @@ class UserListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'email', 'first_name', 'last_name', 'profile_image', 'profile_image_url', 'phone_number', 'country', 'country_code', 'role', 'created_at', 'certifications_count')
+        fields = ('id', 'email', 'first_name', 'last_name', 'profile_image', 'profile_image_url', 'phone_number', 'country', 'country_code', 'role', 'created_at', 'certifications_count', 'is_verified', 'is_active')
 
     def get_certifications_count(self, obj):
         return obj.certifications.count()

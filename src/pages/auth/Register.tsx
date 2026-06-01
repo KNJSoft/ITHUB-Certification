@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../../api/services';
-import { User, Mail, Lock, Loader2, Code2, ArrowRight, Phone, Globe } from 'lucide-react';
+import { User, Mail, Lock, Loader2, Code2, ArrowRight, Phone, Globe, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '../../lib/utils';
+import { useRateLimit } from '../../hooks/useRateLimit';
 
 export const Register: React.FC = () => {
   const [firstName, setFirstName] = useState('');
@@ -18,6 +19,7 @@ export const Register: React.FC = () => {
   const [error, setError] = useState('');
   
   const navigate = useNavigate();
+  const rateLimit = useRateLimit('register');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +33,7 @@ export const Register: React.FC = () => {
     }
     
     try {
-      await authService.register({
+      const response = await authService.register({
         email,
         first_name: firstName,
         last_name: lastName,
@@ -41,9 +43,21 @@ export const Register: React.FC = () => {
         country: country || undefined,
         country_code: countryCode || undefined
       });
-      navigate('/app/login');
+      
+      // Enregistrer la tentative réussie
+      rateLimit.recordAttempt(true);
+      
+      // Rediriger vers la page de vérification d'email
+      navigate(`/app/verify-email?email=${encodeURIComponent(email)}`);
     } catch (err: any) {
-      setError(err.message || 'Erreur lors de l\'inscription');
+      // Enregistrer la tentative échouée
+      rateLimit.recordAttempt(false);
+      
+      if (err.message.includes('Trop de requêtes')) {
+        setError('Trop de tentatives. Veuillez attendre quelques instants.');
+      } else {
+        setError(err.message || 'Erreur lors de l\'inscription');
+      }
     } finally {
       setLoading(false);
     }
@@ -73,6 +87,13 @@ export const Register: React.FC = () => {
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-3 rounded-xl text-sm font-medium">
                 {error}
+              </div>
+            )}
+
+            {rateLimit.isBlocked && (
+              <div className="bg-amber-500/10 border border-amber-500/20 text-amber-500 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2">
+                <AlertCircle size={16} />
+                <span>Trop de tentatives. Réessayez dans {rateLimit.getTimeRemaining()} secondes.</span>
               </div>
             )}
 
@@ -218,7 +239,7 @@ export const Register: React.FC = () => {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || rateLimit.isBlocked}
               className="w-full bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold py-3.5 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-[#2563eb]/20"
             >
               {loading ? (

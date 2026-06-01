@@ -1,3 +1,7 @@
+#############################
+## 75 78 74 83 111 102 116 ##
+#############################
+
 """
 Django settings for core project.
 
@@ -15,6 +19,13 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# config stmp
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'knjprod@gmail.com'
+EMAIL_HOST_PASSWORD = 'nehwbsanjsxfcaco'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -53,6 +64,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'main.middleware.SecurityHeadersMiddleware',  # Middleware de sécurité personnalisé
+    'main.middleware.UserTrackingMiddleware',  # Middleware de suivi des utilisateurs
+    'main.middleware.DeviceTrackingMiddleware',  # Middleware de suivi des appareils
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -60,7 +74,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'main' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -150,16 +164,17 @@ SIMPLE_JWT = {
 
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
     "http://127.0.0.1:3000",
+    "http://192.168.73.1:3000",
+    "http://10.33.211.120:3000",
+    "http://10.33.211.182:3000",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 
 # drf-spectacular Configuration
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'IT HUB Certification Platform API',
+    'TITLE': 'IT HUB Certification',
     'DESCRIPTION': 'API pour la plateforme de micro-certification IT HUB',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,

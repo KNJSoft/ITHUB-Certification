@@ -7,9 +7,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
 from django.db.models import Count, Q
 from django.http import HttpResponse
+from django.core.mail import send_mail
+from django.conf import settings
+from django.utils.crypto import get_random_string
+from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
-from .models import User, Quiz, Question, Option, Attempt, Certification
+from .models import User, Quiz, Question, Option, Attempt, Certification, Device, IP
 from .serializers import (
     UserRegistrationSerializer, UserUpdateSerializer, UserLoginSerializer, UserProfileSerializer,
     QuizListSerializer, QuizDetailSerializer, QuizCreateSerializer, QuizAdminSerializer, QuizAdminUpdateSerializer,
@@ -35,13 +39,206 @@ class RegisterView(APIView):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            refresh = RefreshToken.for_user(user)
+            
+            # Générer un code de vérification
+            verification_code = get_random_string(6, allowed_chars='0123456789')
+            user.verification_code = verification_code
+            user.verification_code_created_at = timezone.now()
+            user.is_verified = False
+            user.is_active = False  # Désactiver le compte jusqu'à vérification
+            user.save()
+            
+            # Envoyer l'email de vérification
+            try:
+                # Rendre le template HTML
+                html_message = render_to_string('verification_email.html', {
+                    'verification_code': verification_code
+                })
+                
+                send_mail(
+                    'Vérification de votre compte IT HUB Certification',
+                    '',  # Message texte vide car on utilise HTML
+                    settings.EMAIL_HOST_USER,
+                    [user.email],
+                    html_message=html_message,
+                    fail_silently=False,
+                )
+            except Exception as e:
+                # En cas d'erreur d'envoi d'email, réactiver le compte pour le développement
+                user.is_active = False
+                user.save()
+                print(f"Erreur lors de l'envoi de l'email: {e}")
+            
             return Response({
-                'user': UserProfileSerializer(user).data,
-                'access': str(refresh.access_token),
-                'refresh': str(refresh),
+                'message': 'Un code de vérification a été envoyé à votre email',
+                'email': user.email
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@extend_schema(
+    tags=['Authentication'],
+    summary='Demander la réinitialisation du mot de passe',
+    description='Envoie un code de réinitialisation par email',
+    request={
+        'type': 'object',
+        'properties': {
+            'email': {'type': 'string'}
+        }
+    },
+    responses={200: {'message': 'Un code de réinitialisation a été envoyé à votre email'}}
+)
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def forgot_password(request):
+    email = request.data.get('email')
+    
+    if not email:
+        return Response({'error': 'Email requis'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        user = User.objects.get(email=email)
+        
+        # Générer un code de réinitialisation
+        reset_code = get_random_string(6, allowed_chars='0123456789')
+        user.reset_password_code = reset_code
+        user.reset_password_code_created_at = timezone.now()
+        user.save()
+        
+        # Rendre le template HTML
+        html_message = render_to_string('reset_password_email.html', {
+            'reset_code': reset_code
+        })
+        
+        # Envoyer l'email de réinitialisation
+        send_mail(
+            'Réinitialisation de votre mot de passe IT HUB Certification',
+            '',
+            settings.EMAIL_HOST_USER,
+            [user.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+        
+        return Response({
+            'message': 'Un code de réinitialisation a été envoyé à votre email',
+            'email': user.email
+        }, status=status.HTTP_200_OK)
+        
+    except User.DoesNotExist:
+        # Pour des raisons de sécurité, ne pas révéler si l'email existe ou non
+        return Response({
+            'message': 'Si cet email existe, un code de réinitialisation a été envoyé'
+        }, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': 'Erreur lors de l\'envoi de l\'email'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@extend_schema(
+    tags=['Authentication'],
+    summary='Vérifier le code de réinitialisation',
+    description='Vérifie le code de réinitialisation et permet de changer le mot de passe',
+    request={
+        'type': 'object',
+        'properties': {
+            'email': {'type': 'string'},
+            'code': {'type': 'string'},
+            'new_password': {'type': 'string'}
+        }
+    },
+    responses={200: {'message': 'Mot de passe réinitialisé avec succès'}}
+)
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def reset_password(request):
+    email = request.data.get('email')
+    code = request.data.get('code')
+    new_password = request.data.get('new_password')
+    
+    if not email or not code or not new_password:
+        return Response({'error': 'Email, code et nouveau mot de passe requis'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        user = User.objects.get(email=email)
+        
+        # Vérifier si le code est correct
+        if user.reset_password_code != code:
+            return Response({'error': 'Code de réinitialisation incorrect'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Vérifier si le code a expiré (15 minutes)
+        if user.reset_password_code_created_at:
+            expiration_time = user.reset_password_code_created_at + timezone.timedelta(minutes=15)
+            if timezone.now() > expiration_time:
+                return Response({'error': 'Code de réinitialisation expiré'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Réinitialiser le mot de passe
+        user.set_password(new_password)
+        user.reset_password_code = None
+        user.reset_password_code_created_at = None
+        user.save()
+        
+        return Response({
+            'message': 'Mot de passe réinitialisé avec succès'
+        }, status=status.HTTP_200_OK)
+        
+    except User.DoesNotExist:
+        return Response({'error': 'Utilisateur non trouvé'}, status=status.HTTP_404_NOT_FOUND)
+
+
+@extend_schema(
+    tags=['Authentication'],
+    summary='Vérifier l\'email',
+    description='Vérifie l\'email de l\'utilisateur avec le code de vérification',
+    request={
+        'type': 'object',
+        'properties': {
+            'email': {'type': 'string'},
+            'code': {'type': 'string'}
+        }
+    },
+    responses={200: {'message': 'Email vérifié avec succès'}}
+)
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def verify_email(request):
+    email = request.data.get('email')
+    code = request.data.get('code')
+    
+    if not email or not code:
+        return Response({'error': 'Email et code requis'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        user = User.objects.get(email=email)
+        
+        # Vérifier si le code est correct et n'a pas expiré (24 heures)
+        if user.verification_code != code:
+            return Response({'error': 'Code de vérification incorrect'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Vérifier si le code a expiré (15 minutes)
+        if user.verification_code_created_at:
+            expiration_time = user.verification_code_created_at + timezone.timedelta(minutes=15)
+            if timezone.now() > expiration_time:
+                return Response({'error': 'Code de vérification expiré'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Vérifier l'email
+        user.is_verified = True
+        user.is_active = True
+        user.verification_code = None
+        user.verification_code_created_at = None
+        user.save()
+        
+        # Générer les tokens JWT
+        refresh = RefreshToken.for_user(user)
+        
+        return Response({
+            'message': 'Email vérifié avec succès',
+            'user': UserProfileSerializer(user).data,
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+        }, status=status.HTTP_200_OK)
+        
+    except User.DoesNotExist:
+        return Response({'error': 'Utilisateur non trouvé'}, status=status.HTTP_404_NOT_FOUND)
 
 
 @extend_schema(
@@ -58,6 +255,36 @@ class LoginView(APIView):
         serializer = UserLoginSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
+
+            # Vérifier si l'email est vérifié
+            if not user.is_verified:
+                # Générer un nouveau code de vérification
+                verification_code = get_random_string(6, allowed_chars='0123456789')
+                user.verification_code = verification_code
+                user.verification_code_created_at = timezone.now()
+                user.save()
+
+                # Rendre le template HTML
+                html_message = render_to_string('verification_email.html', {
+                    'verification_code': verification_code
+                })
+
+                # Envoyer l'email de vérification
+                send_mail(
+                    'Vérification de votre email IT HUB Certification',
+                    '',
+                    settings.EMAIL_HOST_USER,
+                    [user.email],
+                    html_message=html_message,
+                    fail_silently=False,
+                )
+
+                return Response({
+                    'message': 'Email non vérifié. Un nouveau code de vérification a été envoyé.',
+                    'email_verified': False,
+                    'email': user.email
+                }, status=status.HTTP_200_OK)
+
             refresh = RefreshToken.for_user(user)
             return Response({
                 'user': UserProfileSerializer(user).data,
@@ -321,6 +548,52 @@ def certification_pdf(request, certification_id):
 
 
 # --- Admin Views ---
+@extend_schema(
+    tags=['Admin'],
+    summary='Données de sécurité',
+    description='Récupère les devices et IP pour la page de sécurité admin',
+    responses={200: {'type': 'object'}}
+)
+@api_view(['GET'])
+@permission_classes([IsAdmin])
+def security_data(request):
+    """Récupère les devices et IP pour la page de sécurité admin."""
+    devices = Device.objects.all().select_related('user').order_by('-last_login')
+    ips = IP.objects.all().select_related('user').order_by('-created_at')
+    
+    devices_data = []
+    for device in devices:
+        devices_data.append({
+            'id': str(device.id),
+            'user': device.user.email if device.user else 'Anonymous',
+            'name': device.name,
+            'device_type': device.device_type,
+            'os': device.os,
+            'browser': device.browser,
+            'ip_address': device.ip_address,
+            'location': device.location,
+            'last_login': device.last_login.isoformat() if device.last_login else None,
+            'active': device.active,
+            'is_primary': device.is_primary,
+            'user_agent': device.user_agent
+        })
+    
+    ips_data = []
+    for ip in ips:
+        ips_data.append({
+            'id': str(ip.id),
+            'user': ip.user.email if ip.user else 'Anonymous',
+            'ip': ip.ip,
+            'created_at': ip.created_at.isoformat() if ip.created_at else None,
+            'device_id': str(ip.device.id) if ip.device else None
+        })
+    
+    return Response({
+        'devices': devices_data,
+        'ips': ips_data
+    })
+
+
 @extend_schema(
     tags=['Admin Portal'],
     summary='Statistiques de la plateforme',

@@ -22,7 +22,7 @@ export const QuizResult: React.FC = () => {
   
   // Calculate percentage based on score
   const totalQuestions = Object.keys(correct_answers).length;
-  const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+  const percentage = totalQuestions > 0 ? Math.round((score / 100) * 100) : 0;
 
   return (
     <div className="max-w-2xl mx-auto py-10">
@@ -79,7 +79,7 @@ export const QuizResult: React.FC = () => {
           <div className="grid grid-cols-2 gap-8">
             <div className="bg-[#0f172a] p-8 rounded-3xl border border-[#334155] text-center">
               <span className="text-[#64748b] text-[10px] font-black uppercase tracking-[0.2em] block mb-2">Résultat Final</span>
-              <span className="text-4xl font-mono font-black text-white">{score} <span className="text-[#2563eb]">/</span> {totalQuestions}</span>
+              <span className="text-4xl font-mono font-black text-white">{score} <span className="text-[#2563eb]">/</span> 100</span>
             </div>
             <div className="bg-[#0f172a] p-8 rounded-3xl border border-[#334155] text-center">
               <span className="text-[#64748b] text-[10px] font-black uppercase tracking-[0.2em] block mb-2">Précision</span>

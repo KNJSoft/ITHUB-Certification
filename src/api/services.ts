@@ -33,6 +33,15 @@ export const authService = {
   }) => {
     try {
       const response = await api.post('/auth/register/', data);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de l\'inscription');
+    }
+  },
+
+  verifyEmail: async (email: string, code: string) => {
+    try {
+      const response = await api.post('/auth/verify-email/', { email, code });
       const { user, access, refresh } = response.data;
       
       // Store tokens in localStorage
@@ -40,9 +49,31 @@ export const authService = {
       localStorage.setItem('refresh_token', refresh);
       localStorage.setItem('user', JSON.stringify(user));
       
-      return { user, token: access };
+      return response.data;
     } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Erreur lors de l\'inscription');
+      throw new Error(error.response?.data?.error || 'Code de vérification incorrect');
+    }
+  },
+
+  forgotPassword: async (email: string) => {
+    try {
+      const response = await api.post('/auth/forgot-password/', { email });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de l\'envoi de l\'email');
+    }
+  },
+
+  resetPassword: async (email: string, code: string, newPassword: string) => {
+    try {
+      const response = await api.post('/auth/reset-password/', { 
+        email, 
+        code, 
+        new_password: newPassword 
+      });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la réinitialisation du mot de passe');
     }
   },
   
@@ -205,6 +236,15 @@ export const adminService = {
       return { success: true };
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Erreur lors de la suppression de l\'utilisateur');
+    }
+  },
+
+  getSecurityData: async () => {
+    try {
+      const response = await api.get('/admin/security/');
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la récupération des données de sécurité');
     }
   }
 };

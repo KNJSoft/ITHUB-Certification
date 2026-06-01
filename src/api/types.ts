@@ -12,6 +12,8 @@ export interface User {
   country?: string;
   country_code?: string;
   created_at: string;
+  is_verified?: boolean;
+  is_active?: boolean;
 }
 
 export interface Option {
@@ -84,4 +86,6 @@ export interface AdminStats {
 
 export interface UserListItem extends User {
   certifications_count: number;
+  is_verified?: boolean;
+  is_active?: boolean;
 }

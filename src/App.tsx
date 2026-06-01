@@ -18,6 +18,7 @@ import { Profile } from './pages/student/Profile';
 import { AdminLayout } from './components/Layout/AdminLayout';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminActivity } from './pages/admin/AdminActivity';
+import { AdminSecurity } from './pages/admin/AdminSecurity';
 import { AdminQuizzes } from './pages/admin/AdminQuizzes';
 import { AdminUsers } from './pages/admin/AdminUsers';
 import { AdminSettings } from './pages/admin/Settings';
@@ -25,6 +26,9 @@ import { AdminSettings } from './pages/admin/Settings';
 // Auth
 import { Login } from './pages/auth/Login';
 import { Register } from './pages/auth/Register';
+import { VerifyEmail } from './pages/auth/VerifyEmail';
+import { ForgotPassword } from './pages/auth/ForgotPassword';
+import { ResetPassword } from './pages/auth/ResetPassword';
 
 export default function App() {
   return (
@@ -33,6 +37,9 @@ export default function App() {
         {/* Auth Routes */}
         <Route path="/app/login" element={<Login />} />
         <Route path="/app/register" element={<Register />} />
+        <Route path="/app/verify-email" element={<VerifyEmail />} />
+        <Route path="/app/forgot-password" element={<ForgotPassword />} />
+        <Route path="/app/reset-password" element={<ResetPassword />} />
         <Route path="/admin/login" element={<Login isAdmin />} />
 
         {/* Student Portal */}
@@ -65,6 +72,7 @@ export default function App() {
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="activity" element={<AdminActivity />} />
+          <Route path="security" element={<AdminSecurity />} />
           <Route path="quizzes" element={<AdminQuizzes />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="settings" element={<AdminSettings />} />

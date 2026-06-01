@@ -65,7 +65,11 @@ class User(AbstractUser):
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)  # Pour activer/désactiver le compte
     is_staff = models.BooleanField(default=False)  # Si l'utilisateur peut accéder à l'interface d'administration
-
+    is_verified = models.BooleanField(default=False, verbose_name='Email vérifié')
+    verification_code = models.CharField(max_length=6, null=True, blank=True, verbose_name='Code de vérification')
+    verification_code_created_at = models.DateTimeField(null=True, blank=True, verbose_name='Date de création du code')
+    reset_password_code = models.CharField(max_length=6, null=True, blank=True, verbose_name='Code de réinitialisation')
+    reset_password_code_created_at = models.DateTimeField(null=True, blank=True, verbose_name='Date de création du code de réinitialisation')
     # Indique que 'email' est utilisé comme champ d'identification unique
     USERNAME_FIELD = 'email'
     # 'username' et 'email' sont requis par défaut, mais nous utilisons 'email' pour la connexion.
@@ -220,3 +224,222 @@ class Certification(models.Model):
     def __str__(self):
         return f"Attestation de {self.user.email} pour {self.quiz.title}"
 
+
+
+class DeviceManager(models.Manager):
+    """Gestionnaire personnalisé pour le modèle Device"""
+    
+    def get_user_devices(self, user):
+        """Récupère tous les appareils d'un utilisateur"""
+        return self.filter(user=user, active=True)
+    
+    def get_primary_device(self, user):
+        """Récupère l'appareil principal d'un utilisateur"""
+        return self.filter(user=user, is_primary=True, active=True).first()
+        
+    def get_or_create_for_request(self, request, user=None):
+        """Obtient ou crée un appareil à partir de la requête"""
+        return Device.create_from_request(request, user)
+        
+    def get_anonymous_devices(self, session_key):
+        """Récupère les appareils anonymes pour une clé de session"""
+        return self.filter(session_key=session_key, user__isnull=True, active=True)
+        
+    def transfer_to_user(self, devices, user):
+        """Transfère des appareils anonymes à un utilisateur"""
+        if not devices:
+            return
+            
+        # Mettre à jour les appareils pour les associer à l'utilisateur
+        updated = devices.update(
+            user=user,
+            session_key=None,  # Nettoyer la clé de session
+            is_primary=not self.filter(user=user, is_primary=True).exists()  # Définir comme principal si premier appareil
+        )
+        
+        # Si aucun appareil n'était principal, définir le premier comme principal
+        if updated > 0 and not self.filter(user=user, is_primary=True).exists():
+            first_device = self.filter(user=user).first()
+            if first_device:
+                first_device.is_primary = True
+                first_device.save(update_fields=['is_primary'])
+                
+        return updated
+
+
+class Device(models.Model):
+    id = models.CharField(max_length=36, primary_key=True, default=generate_uuid_pk, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='devices', null=True, blank=True)
+    session_key = models.CharField(max_length=40, blank=True, null=True, db_index=True,
+                                 help_text="Session key for anonymous users")
+    name = models.CharField(max_length=255, verbose_name="Nom de l'appareil")
+    device_type = models.CharField(max_length=100, blank=True, null=True, verbose_name="Type d'appareil")
+    os = models.CharField(max_length=100, blank=True, null=True, verbose_name="Système d'exploitation")
+    browser = models.CharField(max_length=100, blank=True, null=True, verbose_name="Navigateur")
+    ip_address = models.GenericIPAddressField(blank=True, null=True, verbose_name="Adresse IP")
+    user_agent = models.TextField(blank=True, null=True, verbose_name="User-Agent")
+    location = models.CharField(max_length=255, blank=True, null=True, verbose_name="Localisation")
+    is_primary = models.BooleanField(default=False, verbose_name="Appareil principal")
+    active = models.BooleanField(default=True, verbose_name="Appareil actif")
+    last_login = models.DateTimeField(auto_now=True, verbose_name="Dernière connexion")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Dernière mise à jour")
+
+    objects = DeviceManager()
+
+    class Meta:
+        verbose_name = "Appareil"
+        verbose_name_plural = "Appareils"
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'is_primary'],
+                condition=models.Q(is_primary=True, user__isnull=False),
+                name='unique_primary_device_per_user'
+            ),
+            models.CheckConstraint(
+                check=(
+                    models.Q(user__isnull=False) | 
+                    (models.Q(user__isnull=True) & ~models.Q(session_key__isnull=True))
+                ),
+                name='device_has_user_or_session'
+            )
+        ]
+    
+    def __str__(self):
+        if self.user:
+            return f"{self.name} ({self.device_type or 'Inconnu'}) - {self.user.email}"
+        return f"{self.name} ({self.device_type or 'Inconnu'}) - Anonyme"
+    
+    def save(self, *args, **kwargs):
+        # S'assurer qu'un seul appareil est marqué comme principal par utilisateur
+        if self.is_primary and self.user:
+            # Mettre à jour tous les autres appareils de l'utilisateur pour les marquer comme non principaux
+            Device.objects.filter(user=self.user, is_primary=True).exclude(pk=self.pk).update(is_primary=False)
+        
+        # Si l'utilisateur est défini, s'assurer que la session_key est effacée
+        if self.user_id and self.session_key:
+            self.session_key = None
+            
+        super().save(*args, **kwargs)
+        
+        # Si c'est le seul appareil de l'utilisateur, le marquer comme principal
+        if self.user and not self.is_primary and not Device.objects.filter(
+            user=self.user, is_primary=True
+        ).exclude(pk=self.pk).exists():
+            self.is_primary = True
+            self.save(update_fields=['is_primary'])
+    
+    def set_as_primary(self):
+        """Définit cet appareil comme appareil principal"""
+        if not self.user:
+            return False
+        self.is_primary = True
+        self.save()
+        return True
+    
+    def disconnect(self):
+        """Déconnecte l'appareil (le marque comme inactif)"""
+        self.active = False
+        self.save(update_fields=['active'])
+        return True
+
+    # type device
+    def get_device_type(self):
+        if self.device_type == 'Ordinateur':
+            return 'Ordinateur'
+        elif self.device_type == 'Mobile':
+            return 'Mobile'
+        elif self.device_type == 'Tablette':
+            return 'Tablette'
+        else:
+            return 'Inconnu'
+    
+    @classmethod
+    def create_from_request(cls, request, user=None):
+        """Crée un nouvel appareil à partir de la requête"""
+        from user_agents import parse
+        
+        # Récupérer les informations de l'utilisateur
+        user_agent_str = request.META.get('HTTP_USER_AGENT', '')
+        user_agent = parse(user_agent_str)
+        
+        # Récupérer l'adresse IP
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        
+        # Créer un nom d'appareil lisible
+        device_name = f"{user_agent.device.brand or 'Inconnu'} {user_agent.device.model or ''} ({user_agent.os.family})"
+        device_name = device_name.strip()
+        
+        # Déterminer si c'est un utilisateur anonyme ou authentifié
+        session_key = request.session.session_key if hasattr(request, 'session') else None
+        
+        # Vérifier si un appareil similaire existe déjà
+        lookup = {
+            'user_agent': user_agent_str[:255],
+        }
+        
+        if user and user.is_authenticated:
+            lookup['user'] = user
+        elif session_key:
+            lookup['session_key'] = session_key
+            lookup['user__isnull'] = True
+        else:
+            # Impossible de créer un appareil sans utilisateur ni session
+            return None
+            
+        device, created = cls.objects.get_or_create(
+            **lookup,
+            defaults={
+                'name': device_name[:255],
+                'device_type': user_agent.device.family,
+                'os': f"{user_agent.os.family} {user_agent.os.version_string or ''}".strip(),
+                'browser': f"{user_agent.browser.family} {user_agent.browser.version_string or ''}".strip(),
+                'ip_address': ip,
+                'session_key': session_key if not user or not user.is_authenticated else None,
+                'is_primary': user and not cls.objects.filter(user=user, is_primary=True).exists()
+            }
+        )
+        
+        # Mettre à jour la dernière connexion
+        if not created:
+            update_fields = ['last_login']
+            
+            # Mettre à jour l'utilisateur si nécessaire (passage d'anonyme à connecté)
+            if user and user.is_authenticated and (not device.user or device.user != user):
+                device.user = user
+                device.session_key = None  # Nettoyer la clé de session
+                update_fields.extend(['user', 'session_key'])
+                
+                # Si c'est le premier appareil de l'utilisateur, le marquer comme principal
+                if not cls.objects.filter(user=user, is_primary=True).exists():
+                    device.is_primary = True
+                    update_fields.append('is_primary')
+            
+            device.save(update_fields=update_fields)
+        
+        return device
+
+class IP(models.Model):
+    id = models.CharField(max_length=36, primary_key=True, default=generate_uuid_pk, editable=False)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    ip = models.CharField(max_length=255, null=True, blank=True)
+    device = models.ForeignKey(Device, on_delete=models.SET_NULL, null=True, blank=True) # device
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "IP"
+        verbose_name_plural = "IPs"
+        indexes = [
+            models.Index(fields=['user']),
+            models.Index(fields=['ip']),
+        ]
+    
+    def __str__(self):
+        username = self.user.username if self.user else 'Anonymous'
+        return f"{self.ip} - {username}"
+        # return f"{self.user} {self.ip}"

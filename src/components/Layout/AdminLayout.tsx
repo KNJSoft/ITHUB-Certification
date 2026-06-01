@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
-import { LayoutDashboard, FileText, Users, Settings, LogOut, ShieldCheck, Mail, User, Activity } from 'lucide-react';
+import { LayoutDashboard, FileText, Users, Settings, LogOut, ShieldCheck, Mail, User, Activity, Shield } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { motion } from 'motion/react';
 
@@ -18,6 +18,7 @@ export const AdminLayout: React.FC = () => {
   const navItems = [
     { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
     { name: 'Activité Récente', path: '/admin/activity', icon: Activity },
+    { name: 'Sécurité', path: '/admin/security', icon: Shield },
     { name: 'Gérer les Quiz', path: '/admin/quizzes', icon: FileText },
     { name: 'Utilisateurs', path: '/admin/users', icon: Users },
     { name: 'Paramètres', path: '/admin/settings', icon: Settings },
