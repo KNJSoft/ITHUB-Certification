@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.pagination import PageNumberPagination
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
 from django.db.models import Count, Q
@@ -45,7 +46,7 @@ class RegisterView(APIView):
             user.verification_code = verification_code
             user.verification_code_created_at = timezone.now()
             user.is_verified = False
-            user.is_active = False  # Désactiver le compte jusqu'à vérification
+            user.is_active = True  # Désactiver le compte jusqu'à vérification
             user.save()
             
             # Envoyer l'email de vérification
@@ -65,7 +66,7 @@ class RegisterView(APIView):
                 )
             except Exception as e:
                 # En cas d'erreur d'envoi d'email, réactiver le compte pour le développement
-                user.is_active = False
+                user.is_active = True
                 user.save()
                 print(f"Erreur lors de l'envoi de l'email: {e}")
             
@@ -253,37 +254,42 @@ class LoginView(APIView):
 
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
-        if serializer.is_valid():
+        # Vérifier si l'email est vérifié
+        if serializer.is_valid() and not serializer.validated_data['user'].is_verified:
+            # Générer un nouveau code de vérification
+            verification_code = get_random_string(6, allowed_chars='0123456789')
+            serializer.validated_data['user'].verification_code = verification_code
+            serializer.validated_data['user'].verification_code_created_at = timezone.now()
+            serializer.validated_data['user'].save()
+
+            # Rendre le template HTML
+            html_message = render_to_string('verification_email.html', {
+                'verification_code': verification_code
+            })
+
+            # Envoyer l'email de vérification
+            send_mail(
+                'Vérification de votre email IT HUB Certification',
+                '',
+                settings.EMAIL_HOST_USER,
+                [serializer.validated_data['user'].email],
+                html_message=html_message,
+                fail_silently=False,
+            )
+
+            return Response({
+                'message': 'Email non vérifié. Un nouveau code de vérification a été envoyé.',
+                'email_verified': False,
+                'redirect_to':'/app/verify-email',
+                'email': serializer.validated_data['user'].email
+            }, status=status.HTTP_200_OK)
+        # elif not serializer.is_valid() and serializer.validated_data['user'].is_verified :
+        #     return Response({
+        #         'message': 'Désolé votre compte à été désactivé, contactez un administrateur.',
+        #         'is_active': False,
+        #     }, status=status.HTTP_200_OK)
+        if serializer.is_valid() and serializer.validated_data['user'].is_verified:
             user = serializer.validated_data['user']
-
-            # Vérifier si l'email est vérifié
-            if not user.is_verified:
-                # Générer un nouveau code de vérification
-                verification_code = get_random_string(6, allowed_chars='0123456789')
-                user.verification_code = verification_code
-                user.verification_code_created_at = timezone.now()
-                user.save()
-
-                # Rendre le template HTML
-                html_message = render_to_string('verification_email.html', {
-                    'verification_code': verification_code
-                })
-
-                # Envoyer l'email de vérification
-                send_mail(
-                    'Vérification de votre email IT HUB Certification',
-                    '',
-                    settings.EMAIL_HOST_USER,
-                    [user.email],
-                    html_message=html_message,
-                    fail_silently=False,
-                )
-
-                return Response({
-                    'message': 'Email non vérifié. Un nouveau code de vérification a été envoyé.',
-                    'email_verified': False,
-                    'email': user.email
-                }, status=status.HTTP_200_OK)
 
             refresh = RefreshToken.for_user(user)
             return Response({
@@ -669,12 +675,16 @@ def admin_stats(request):
 def recent_activity(request):
     # Permission class already ensures only admins can access
 
+    # Get pagination parameters
+    page = int(request.GET.get('page', 1))
+    page_size = int(request.GET.get('page_size', 10))
+
     activity_data = []
 
     # Get recent certifications
     recent_certifications = Certification.objects.select_related(
         'user', 'quiz'
-    ).order_by('-obtained_date')[:5]
+    ).order_by('-obtained_date')
 
     for cert in recent_certifications:
         latest_attempt = Attempt.objects.filter(
@@ -695,7 +705,7 @@ def recent_activity(request):
         })
 
     # Get recent quiz creations
-    recent_quizzes = Quiz.objects.order_by('-created_at')[:5]
+    recent_quizzes = Quiz.objects.order_by('-created_at')
     for quiz in recent_quizzes:
         activity_data.append({
             'id': quiz.id,
@@ -707,7 +717,7 @@ def recent_activity(request):
         })
 
     # Get recent user registrations
-    recent_users = User.objects.filter(role='student').order_by('-created_at')[:5]
+    recent_users = User.objects.filter(role='student').order_by('-created_at')
     for user in recent_users:
         activity_data.append({
             'id': user.id,
@@ -721,7 +731,7 @@ def recent_activity(request):
     # Get recent quiz attempts
     recent_attempts = Attempt.objects.select_related(
         'user', 'quiz'
-    ).order_by('-attempt_date')[:5]
+    ).order_by('-attempt_date')
     for attempt in recent_attempts:
         activity_data.append({
             'id': attempt.id,
@@ -735,11 +745,53 @@ def recent_activity(request):
             'time_ago': calculate_time_ago(attempt.attempt_date)
         })
 
+    # Get recent password reset requests
+    recent_password_resets = User.objects.filter(
+        reset_password_code_created_at__isnull=False
+    ).order_by('-reset_password_code_created_at')
+    for user in recent_password_resets:
+        activity_data.append({
+            'id': user.id,
+            'type': 'password_reset',
+            'user_name': f"{user.first_name} {user.last_name}",
+            'user_email': user.email,
+            'created_at': user.reset_password_code_created_at,
+            'time_ago': calculate_time_ago(user.reset_password_code_created_at)
+        })
+
+    # Get recent email verifications
+    recent_verifications = User.objects.filter(
+        verification_code_created_at__isnull=False,
+        is_verified=True
+    ).order_by('-verification_code_created_at')
+    for user in recent_verifications:
+        activity_data.append({
+            'id': user.id,
+            'type': 'email_verified',
+            'user_name': f"{user.first_name} {user.last_name}",
+            'user_email': user.email,
+            'created_at': user.verification_code_created_at,
+            'time_ago': calculate_time_ago(user.verification_code_created_at)
+        })
+
     # Sort all activities by date/time
     activity_data.sort(key=lambda x: x.get('obtained_date') or x.get('created_at') or x.get('attempt_date'), reverse=True)
 
-    # Return only the 10 most recent activities
-    return Response(activity_data[:10])
+    # Calculate pagination
+    total_items = len(activity_data)
+    total_pages = (total_items + page_size - 1) // page_size
+    start_index = (page - 1) * page_size
+    end_index = start_index + page_size
+    paginated_data = activity_data[start_index:end_index]
+
+    # Return paginated activities
+    return Response({
+        'results': paginated_data,
+        'total': total_items,
+        'page': page,
+        'page_size': page_size,
+        'total_pages': total_pages
+    })
 
 
 def calculate_time_ago(date):
@@ -773,6 +825,8 @@ def calculate_time_ago(date):
 class UserListView(ListAPIView):
     serializer_class = UserListSerializer
     permission_classes = [IsAdmin]
+    pagination_class = PageNumberPagination
+    PageNumberPagination.page_size = 10
 
     def get_queryset(self):
         return User.objects.order_by('-created_at')
@@ -907,3 +961,4 @@ class QuizAdminDetailView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Quiz.DoesNotExist:
             return Response({'error': 'Quiz non trouvé'}, status=status.HTTP_404_NOT_FOUND)
+recent_activity

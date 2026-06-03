@@ -8,7 +8,14 @@ export const authService = {
   login: async (email: string, password: string) => {
     try {
       const response = await api.post('/auth/login/', { email, password });
-      const { user, access, refresh } = response.data;
+      console.log(response)
+      const email_verified=response?.data?.email_verified;
+      const is_active= response.data.is_active
+      const redirect_to= response.data.redirect_to
+      if (!email_verified && redirect_to) {
+        return{email_verified:email_verified,redirect_to:redirect_to};
+      }else{
+        const { user, access, refresh } = response.data;
       
       // Store tokens in localStorage
       localStorage.setItem('access_token', access);
@@ -16,7 +23,10 @@ export const authService = {
       localStorage.setItem('user', JSON.stringify(user));
       
       return { user, token: access };
+      }
+      
     } catch (error: any) {
+      console.log('error: ',error)
       throw new Error(error.response?.data?.error || 'Identifiants invalides');
     }
   },
@@ -194,18 +204,22 @@ export const adminService = {
     }
   },
   
-  getRecentActivity: async () => {
+  getRecentActivity: async (page: number = 1, pageSize: number = 10) => {
     try {
-      const response = await api.get('/admin/recent-activity/');
+      const response = await api.get('/admin/recent-activity/', {
+        params: { page, page_size: pageSize }
+      });
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Erreur lors de la récupération de l\'activité récente');
     }
   },
   
-  getUsers: async () => {
+  getUsers: async (page: number = 1, pageSize: number = 10) => {
     try {
-      const response = await api.get('/admin/users/');
+      const response = await api.get('/admin/users/', {
+        params: { page, page_size: pageSize }
+      });
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Erreur lors de la récupération des utilisateurs');

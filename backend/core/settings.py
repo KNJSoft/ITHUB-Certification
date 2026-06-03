@@ -20,7 +20,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # config stmp
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
@@ -168,6 +168,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://192.168.73.1:3000",
     "http://10.33.211.120:3000",
     "http://10.33.211.182:3000",
+    'http://192.168.27.1:3000',
 ]
 
 CORS_ALLOW_CREDENTIALS = True

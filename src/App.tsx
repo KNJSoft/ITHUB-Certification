@@ -13,6 +13,7 @@ import { QuizPage } from './pages/student/QuizPage';
 import { QuizResult } from './pages/student/QuizResult';
 import { Certifications } from './pages/student/Certifications';
 import { Profile } from './pages/student/Profile';
+import { NotFound } from './pages/student/NotFound';
 
 // Admin Portal
 import { AdminLayout } from './components/Layout/AdminLayout';
@@ -22,6 +23,7 @@ import { AdminSecurity } from './pages/admin/AdminSecurity';
 import { AdminQuizzes } from './pages/admin/AdminQuizzes';
 import { AdminUsers } from './pages/admin/AdminUsers';
 import { AdminSettings } from './pages/admin/Settings';
+import { AdminNotFound } from './pages/admin/AdminNotFound';
 
 // Auth
 import { Login } from './pages/auth/Login';
@@ -58,6 +60,7 @@ export default function App() {
           <Route path="quiz/:id/result" element={<QuizResult />} />
           <Route path="certifications" element={<Certifications />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="*" element={<NotFound />} />
         </Route>
 
         {/* Admin Portal */}
@@ -76,6 +79,7 @@ export default function App() {
           <Route path="quizzes" element={<AdminQuizzes />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="settings" element={<AdminSettings />} />
+          <Route path="*" element={<AdminNotFound />} />
         </Route>
 
         {/* Redirects */}

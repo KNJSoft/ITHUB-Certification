@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { adminService } from '../../api/services';
 import { UserListItem } from '../../api/types';
-import { Search, User, Mail, Calendar, Award, ExternalLink, Activity, Filter, Eye, Edit2, Trash } from 'lucide-react';
+import { Search, User, Mail, Calendar, Award, ExternalLink, Activity, Filter, Eye, Edit2, Trash, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '../../lib/utils';
 
@@ -12,6 +12,12 @@ export const AdminUsers: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserListItem | null>(null);
+  const [pagination, setPagination] = useState({
+    count: 0,
+    next: null as string | null,
+    previous: null as string | null,
+    page: 1
+  });
   const [newUser, setNewUser] = useState({
     email: '',
     first_name: '',
@@ -29,8 +35,14 @@ export const AdminUsers: React.FC = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const data = await adminService.getUsers();
-        setUsers(data);
+        const data = await adminService.getUsers(1, 10);
+        setUsers(data.results || data);
+        setPagination({
+          count: data.count || 0,
+          next: data.next || null,
+          previous: data.previous || null,
+          page: 1
+        });
         console.log(data)
       } catch (err: any) {
         setError(err.message || 'Erreur lors de la récupération des utilisateurs');
@@ -40,6 +52,24 @@ export const AdminUsers: React.FC = () => {
     };
     fetchUsers();
   }, []);
+
+  const handlePageChange = async (newPage: number) => {
+    setLoading(true);
+    try {
+      const data = await adminService.getUsers(newPage, 10);
+      setUsers(data.results || data);
+      setPagination({
+        count: data.count || 0,
+        next: data.next || null,
+        previous: data.previous || null,
+        page: newPage
+      });
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors de la récupération des utilisateurs');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCreateUser = async () => {
     if (!newUser.email || !newUser.first_name || !newUser.last_name || !newUser.password) {
@@ -118,9 +148,15 @@ export const AdminUsers: React.FC = () => {
         is_verified: false,
         is_active: true
       });
-      // Recharger la liste des utilisateurs
-      const data = await adminService.getUsers();
-      setUsers(data);
+      // Recharger la liste des utilisateurs avec la pagination actuelle
+      const data = await adminService.getUsers(pagination.page, 10);
+      setUsers(data.results || data);
+      setPagination({
+        count: data.count || 0,
+        next: data.next || null,
+        previous: data.previous || null,
+        page: pagination.page
+      });
     } catch (err: any) {
       setError(err.message || 'Erreur lors de la mise à jour de l\'utilisateur');
     } finally {
@@ -133,7 +169,15 @@ export const AdminUsers: React.FC = () => {
     setLoading(true);
     try {
       await adminService.deleteUser(userId);
-      setUsers(Array.isArray(users['results']) && users['results'].filter(u => u.id !== userId));
+      // Recharger la page actuelle avec pagination
+      const data = await adminService.getUsers(pagination.page, 10);
+      setUsers(data.results || data);
+      setPagination({
+        count: data.count || 0,
+        next: data.next || null,
+        previous: data.previous || null,
+        page: pagination.page
+      });
     } catch (err: any) {
       setError(err.message || 'Erreur lors de la suppression de l\'utilisateur');
     } finally {
@@ -159,7 +203,7 @@ export const AdminUsers: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const filteredUsers =Array.isArray(users['results']) && users['results'].filter(u => 
+  const filteredUsers =Array.isArray(users) && users.filter(u => 
     `${u.first_name} ${u.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) || 
     u.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -303,10 +347,27 @@ export const AdminUsers: React.FC = () => {
         </div>
         
         <div className="p-8 bg-[#0f172a30] flex items-center justify-between">
-           <p className="text-[10px] font-black text-[#64748b] uppercase tracking-[0.2em]">{filteredUsers.length} étudiants trouvés</p>
-           <div className="flex gap-2">
-              <button disabled className="px-5 py-2.5 bg-[#0a0f1d] border border-[#7c3aed10] text-[#475569] rounded-xl text-[10px] font-black uppercase tracking-widest opacity-50">Précédent</button>
-              <button className="px-5 py-2.5 bg-[#0a0f1d] border border-[#7c3aed10] text-[#f8fafc] rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-[#7c3aed]">Suivant</button>
+           <p className="text-[10px] font-black text-[#64748b] uppercase tracking-[0.2em]">{pagination.count} utilisateurs trouvés</p>
+           <div className="flex items-center gap-2">
+              <button
+                onClick={() => handlePageChange(pagination.page - 1)}
+                disabled={!pagination.previous}
+                className="px-5 py-2.5 bg-[#0a0f1d] border border-[#7c3aed10] text-[#f8fafc] rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-[#7c3aed] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+              >
+                <ChevronLeft size={14} />
+                Précédent
+              </button>
+              <span className="text-[10px] font-black text-[#64748b] uppercase tracking-widest px-3">
+                Page {pagination.page}
+              </span>
+              <button
+                onClick={() => handlePageChange(pagination.page + 1)}
+                disabled={!pagination.next}
+                className="px-5 py-2.5 bg-[#0a0f1d] border border-[#7c3aed10] text-[#f8fafc] rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-[#7c3aed] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+              >
+                Suivant
+                <ChevronRight size={14} />
+              </button>
            </div>
         </div>
       </div>

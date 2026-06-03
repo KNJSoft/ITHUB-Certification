@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { adminService } from '../../api/services';
-import { Award, BookOpen, UserPlus, CheckCircle, Activity, Calendar, Filter } from 'lucide-react';
+import { Award, BookOpen, UserPlus, CheckCircle, Activity, Calendar, Filter, Key, Mail, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '../../lib/utils';
 
@@ -9,12 +9,24 @@ export const AdminActivity: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
+  const [pagination, setPagination] = useState({
+    total: 0,
+    page: 1,
+    page_size: 10,
+    total_pages: 1
+  });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const activityData = await adminService.getRecentActivity();
-        setRecentActivity(activityData);
+        const activityData = await adminService.getRecentActivity(1, 10);
+        setRecentActivity(activityData.results || []);
+        setPagination({
+          total: activityData.total || 0,
+          page: activityData.page || 1,
+          page_size: activityData.page_size || 10,
+          total_pages: activityData.total_pages || 1
+        });
       } catch (err: any) {
         setError(err.message || 'Erreur lors de la récupération des activités');
       } finally {
@@ -24,8 +36,26 @@ export const AdminActivity: React.FC = () => {
     fetchData();
   }, []);
 
-  const filteredActivities = filterType === 'all' 
-    ? recentActivity 
+  const handlePageChange = async (newPage: number) => {
+    setLoading(true);
+    try {
+      const activityData = await adminService.getRecentActivity(newPage, 10);
+      setRecentActivity(activityData.results || []);
+      setPagination({
+        total: activityData.total || 0,
+        page: activityData.page || 1,
+        page_size: activityData.page_size || 10,
+        total_pages: activityData.total_pages || 1
+      });
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors de la récupération des activités');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredActivities = filterType === 'all'
+    ? recentActivity
     : recentActivity.filter(activity => activity.type === filterType);
 
   if (loading) return (
@@ -69,6 +99,8 @@ export const AdminActivity: React.FC = () => {
               <option value="quiz_created">Quiz créés</option>
               <option value="user_registered">Inscriptions</option>
               <option value="quiz_attempt">Tentatives</option>
+              <option value="password_reset">Réinitialisations mot de passe</option>
+              <option value="email_verified">Vérifications email</option>
             </select>
           </div>
         </div>
@@ -79,8 +111,27 @@ export const AdminActivity: React.FC = () => {
           <div className="flex items-center gap-4">
             <Calendar size={20} className="text-[#64748b]" />
             <span className="text-[10px] font-black text-[#64748b] uppercase tracking-[0.2em]">
-              {filteredActivities.length} activités trouvées
+              {pagination.total} activités trouvées
             </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handlePageChange(pagination.page - 1)}
+              disabled={pagination.page === 1}
+              className="p-2 bg-[#0f172a] border border-[#7c3aed10] rounded-lg text-[#64748b] hover:text-white hover:border-[#7c3aed30] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <span className="text-[10px] font-black text-[#64748b] uppercase tracking-[0.2em] px-3">
+              Page {pagination.page} / {pagination.total_pages}
+            </span>
+            <button
+              onClick={() => handlePageChange(pagination.page + 1)}
+              disabled={pagination.page === pagination.total_pages}
+              className="p-2 bg-[#0f172a] border border-[#7c3aed10] rounded-lg text-[#64748b] hover:text-white hover:border-[#7c3aed30] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              <ChevronRight size={16} />
+            </button>
           </div>
         </div>
 
@@ -104,12 +155,16 @@ export const AdminActivity: React.FC = () => {
                     activity.type === 'certification' && "bg-gradient-to-br from-[#7c3aed] to-[#4f46e5]",
                     activity.type === 'quiz_created' && "bg-gradient-to-br from-emerald-500 to-green-600",
                     activity.type === 'user_registered' && "bg-gradient-to-br from-blue-500 to-cyan-600",
-                    activity.type === 'quiz_attempt' && "bg-gradient-to-br from-amber-500 to-orange-600"
+                    activity.type === 'quiz_attempt' && "bg-gradient-to-br from-amber-500 to-orange-600",
+                    activity.type === 'password_reset' && "bg-gradient-to-br from-rose-500 to-pink-600",
+                    activity.type === 'email_verified' && "bg-gradient-to-br from-violet-500 to-purple-600"
                   )}>
                     {activity.type === 'certification' && <Award size={24} />}
                     {activity.type === 'quiz_created' && <BookOpen size={24} />}
                     {activity.type === 'user_registered' && <UserPlus size={24} />}
                     {activity.type === 'quiz_attempt' && <CheckCircle size={24} />}
+                    {activity.type === 'password_reset' && <Key size={24} />}
+                    {activity.type === 'email_verified' && <Mail size={24} />}
                   </div>
                   <div>
                     <p className="font-black text-white text-sm uppercase">
@@ -117,12 +172,16 @@ export const AdminActivity: React.FC = () => {
                       {activity.type === 'quiz_created' && 'Nouveau quiz créé'}
                       {activity.type === 'user_registered' && activity.user_name}
                       {activity.type === 'quiz_attempt' && activity.user_name}
+                      {activity.type === 'password_reset' && activity.user_name}
+                      {activity.type === 'email_verified' && activity.user_name}
                     </p>
                     <p className="text-[11px] text-[#64748b] font-medium tracking-wider">
                       {activity.type === 'certification' && `A obtenu le badge ${activity.quiz_title}`}
                       {activity.type === 'quiz_created' && `${activity.quiz_title} (${activity.quiz_category})`}
                       {activity.type === 'user_registered' && `Nouvel étudiant inscrit: ${activity.user_email}`}
                       {activity.type === 'quiz_attempt' && `Tentative: ${activity.quiz_title} - ${activity.passed ? 'Réussi' : 'Échoué'}`}
+                      {activity.type === 'password_reset' && `Demande de réinitialisation: ${activity.user_email}`}
+                      {activity.type === 'email_verified' && `Email vérifié: ${activity.user_email}`}
                     </p>
                   </div>
                 </div>
