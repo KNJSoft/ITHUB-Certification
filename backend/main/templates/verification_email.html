@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vérification de votre compte IT HUB Certification</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .content h2 {
+            color: #1e293b;
+            font-size: 22px;
+            margin: 0 0 20px 0;
+        }
+        .content p {
+            color: #64748b;
+            line-height: 1.6;
+            margin: 0 0 20px 0;
+            font-size: 15px;
+        }
+        .code-container {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 2px solid #2563eb;
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            margin: 30px 0;
+        }
+        .code {
+            font-size: 36px;
+            font-weight: 800;
+            color: #2563eb;
+            letter-spacing: 8px;
+            margin: 0;
+        }
+        .code-label {
+            color: #64748b;
+            font-size: 14px;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .info-box {
+            background-color: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .info-box p {
+            margin: 0;
+            color: #92400e;
+            font-size: 14px;
+        }
+        .footer {
+            background-color: #1e293b;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 13px;
+        }
+        .footer p {
+            margin: 5px 0;
+            opacity: 0.7;
+        }
+        .footer a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 IT HUB Certification</h1>
+            <p>Vérification de votre compte</p>
+        </div>
+        
+        <div class="content">
+            <h2>Bienvenue !</h2>
+            
+            <p>
+                Merci de vous être inscrit sur IT HUB Certification. Pour finaliser la création de votre compte et accéder à notre plateforme de quiz et de certifications, veuillez vérifier votre adresse email.
+            </p>
+            
+            <p>
+                Voici votre code de vérification :
+            </p>
+            
+            <div class="code-container">
+                <p class="code-label">Code de vérification</p>
+                <p class="code">{{ verification_code }}</p>
+            </div>
+            
+            <div class="info-box">
+                <p>
+                    ⚠️ <strong>Important :</strong> Ce code expire dans 15 minutes. Si vous n'avez pas demandé cette vérification, ignorez cet email.
+                </p>
+            </div>
+            
+            <p>
+                Si vous avez des questions ou besoin d'aide, n'hésitez pas à contacter notre équipe de support.
+            </p>
+            
+            <p>
+                Cordialement,<br>
+                L'équipe IT HUB Certification
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2026 IT HUB Certification. Tous droits réservés.</p>
+            <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
+        </div>
+    </div>
+</body>
+</html>
