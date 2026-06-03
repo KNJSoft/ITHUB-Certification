@@ -379,6 +379,17 @@ export const AdminQuizzes: React.FC = () => {
                     <option value="DevOps">DevOps</option>
                     <option value="Frontend">Frontend</option>
                     <option value="Security">Security</option>
+                    <option value="Backend">Backend</option>
+                    <option value="Mobile">Mobile</option>
+                    <option value="Data">Data</option>
+                    <option value="AI">AI</option>
+                    <option value="Blockchain">Blockchain</option>
+                    <option value="IoT">IoT</option>
+                    <option value="Cybersecurity">Cybersecurity</option>
+                    <option value="Database">Database</option>
+                    <option value="Networking">Networking</option>
+                    {/* other categories */}
+                    <option value="Other">Autre</option>
                   </select>
                 </div>
               </div>
