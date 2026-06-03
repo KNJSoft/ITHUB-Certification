@@ -98,27 +98,27 @@ export const QuizPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-140px)]">
       {/* Sticky Quiz Header */}
-      <div className="bg-[#1e293b] border border-[#334155] rounded-3xl p-6 mb-8 flex items-center justify-between sticky top-24 z-30 shadow-2xl backdrop-blur-sm">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-[#2563eb] text-white rounded-2xl flex items-center justify-center font-black shadow-lg shadow-[#2563eb]/20">
+      <div className="bg-[#1e293b] border border-[#334155] rounded-2xl sm:rounded-3xl p-4 sm:p-6 mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sticky top-20 sm:top-24 z-30 shadow-2xl backdrop-blur-sm">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#2563eb] text-white rounded-2xl flex items-center justify-center font-black shadow-lg shadow-[#2563eb]/20 text-sm sm:text-base">
             {currentIdx + 1}
           </div>
           <div>
-            <h1 className="font-bold text-[#f8fafc] leading-tight">{quiz.title}</h1>
-            <p className="text-[10px] text-[#94a3b8] uppercase tracking-widest font-black">Question en cours</p>
+            <h1 className="font-bold text-[#f8fafc] leading-tight text-sm sm:text-base">{quiz.title}</h1>
+            <p className="text-[9px] sm:text-[10px] text-[#94a3b8] uppercase tracking-widest font-black">Question en cours</p>
           </div>
         </div>
 
         <div className={cn(
-          "flex items-center gap-3 px-5 py-2.5 rounded-xl border font-mono font-black text-lg min-w-[120px] justify-center transition-all",
+          "flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl border font-mono font-black text-base sm:text-lg min-w-[100px] sm:min-w-[120px] justify-center transition-all",
           timeLeft < 60 ? "bg-red-500/10 border-red-500 text-red-500 animate-pulse scale-105" : "bg-[#0f172a] border-[#334155] text-[#2563eb]"
         )}>
-          <Timer size={20} />
+          <Timer size={16} className="sm:size-20" />
           <span>{formatTime(timeLeft)}</span>
         </div>
       </div>
 
-      <div className="h-1.5 bg-[#1e293b] rounded-full overflow-hidden mb-8 border border-[#334155]">
+      <div className="h-1 sm:h-1.5 bg-[#1e293b] rounded-full overflow-hidden mb-6 sm:mb-8 border border-[#334155]">
         <motion.div 
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
@@ -133,33 +133,33 @@ export const QuizPage: React.FC = () => {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 1.02 }}
           transition={{ duration: 0.2 }}
-          className="bg-[#1e293b] border border-[#334155] rounded-[2.5rem] p-10 flex-1 flex flex-col shadow-xl"
+          className="bg-[#1e293b] border border-[#334155] rounded-[1.5rem] sm:rounded-[2rem] md:rounded-[2.5rem] p-6 sm:p-8 md:p-10 flex-1 flex flex-col shadow-xl"
         >
-          <div className="flex items-start gap-4 mb-10">
-             <div className="mt-1.5"><Info size={20} className="text-[#2563eb]" /></div>
-             <h2 className="text-2xl font-black leading-snug text-[#f8fafc]">{currentQuestion.text}</h2>
+          <div className="flex items-start gap-3 sm:gap-4 mb-6 sm:mb-10">
+             <div className="mt-1 sm:mt-1.5"><Info size={16} className="text-[#2563eb] sm:size-20" /></div>
+             <h2 className="text-lg sm:text-xl md:text-2xl font-black leading-snug text-[#f8fafc]">{currentQuestion.text}</h2>
           </div>
           
-          <div className="space-y-4 flex-1">
+          <div className="space-y-3 sm:space-y-4 flex-1">
             {currentQuestion.options.map((option) => (
               <button
                 key={option.id}
                 onClick={() => handleSelect(option.id)}
                 className={cn(
-                  "w-full text-left p-6 rounded-2xl border transition-all duration-200 group flex items-center gap-4 relative overflow-hidden",
+                  "w-full text-left p-4 sm:p-6 rounded-2xl border transition-all duration-200 group flex items-center gap-3 sm:gap-4 relative overflow-hidden",
                   answers[currentQuestion.id] === option.id 
                     ? "bg-[#2563eb]/20 border-[#2563eb] ring-2 ring-[#2563eb]/10" 
                     : "bg-[#0f172a] border-[#334155] hover:border-[#475569] hover:bg-[#1e293b]"
                 )}
               >
                 <div className={cn(
-                  "w-6 h-6 rounded-lg border-2 flex-shrink-0 flex items-center justify-center transition-all",
+                  "w-5 h-5 sm:w-6 sm:h-6 rounded-lg border-2 flex-shrink-0 flex items-center justify-center transition-all",
                   answers[currentQuestion.id] === option.id ? "bg-[#2563eb] border-[#2563eb] rotate-0" : "border-[#334155] group-hover:border-[#475569] rotate-45"
                 )}>
                   {answers[currentQuestion.id] === option.id && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
                 </div>
                 <span className={cn(
-                  "font-bold text-lg",
+                  "font-bold text-sm sm:text-base md:text-lg",
                   answers[currentQuestion.id] === option.id ? "text-white" : "text-[#94a3b8] group-hover:text-[#cbd5e1]"
                 )}>{option.text}</span>
                 
@@ -172,13 +172,13 @@ export const QuizPage: React.FC = () => {
         </motion.div>
       </AnimatePresence>
 
-      <div className="grid grid-cols-2 gap-4 mt-8">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 mt-6 sm:mt-8">
         <button
           disabled={currentIdx === 0}
           onClick={() => setCurrentIdx(prev => prev - 1)}
-          className="flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest text-[#94a3b8] bg-[#1e293b] border border-[#334155] hover:text-[#f8fafc] disabled:opacity-30 transition-all active:scale-95"
+          className="flex items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-6 md:px-8 py-3 sm:py-4 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-widest text-[#94a3b8] bg-[#1e293b] border border-[#334155] hover:text-[#f8fafc] disabled:opacity-30 transition-all active:scale-95"
         >
-          <ChevronLeft size={20} />
+          <ChevronLeft size={16} className="sm:size-20" />
           <span>Précédent</span>
         </button>
 
@@ -187,11 +187,11 @@ export const QuizPage: React.FC = () => {
             onClick={handleSubmit}
             disabled={!isAnswered}
             className={cn(
-               "flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all transform active:scale-95 shadow-xl",
+               "flex items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-6 md:px-8 py-3 sm:py-4 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-widest transition-all transform active:scale-95 shadow-xl",
                isAnswered ? "bg-[#2563eb] text-white shadow-[#2563eb]/20 hover:bg-[#1d4ed8]" : "bg-[#334155] text-[#64748b] cursor-not-allowed"
             )}
           >
-            <Flag size={20} />
+            <Flag size={16} className="sm:size-20" />
             <span>Terminer le Quiz</span>
           </button>
         ) : (
@@ -199,12 +199,12 @@ export const QuizPage: React.FC = () => {
             onClick={() => setCurrentIdx(prev => prev + 1)}
             disabled={!isAnswered}
             className={cn(
-               "flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all active:scale-95",
+               "flex items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-6 md:px-8 py-3 sm:py-4 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-widest transition-all active:scale-95",
                isAnswered ? "bg-[#1e293b] border border-[#2563eb] text-white" : "bg-[#0f172a] border border-[#334155] text-[#64748b] cursor-not-allowed"
             )}
           >
             <span>Question Suivante</span>
-            <ChevronRight size={20} />
+            <ChevronRight size={16} className="sm:size-20" />
           </button>
         )}
       </div>

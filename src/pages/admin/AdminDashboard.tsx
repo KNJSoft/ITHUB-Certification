@@ -83,85 +83,85 @@ export const AdminDashboard: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-6 sm:space-y-8">
       <header className="flex flex-col gap-2">
-        <div className="flex items-center gap-3">
-           <BarChart3 className="text-[#7c3aed]" size={32} />
-           <h1 className="text-4xl font-black tracking-tight text-white uppercase">Vue d'ensemble</h1>
+        <div className="flex items-center gap-2 sm:gap-3">
+           <BarChart3 className="text-[#7c3aed]" size={20} />
+           <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-white uppercase">Vue d'ensemble</h1>
         </div>
-        <p className="text-[#64748b] font-medium tracking-wide">Performances globales de la plateforme de certification.</p>
+        <p className="text-[#64748b] text-sm sm:text-base font-medium tracking-wide">Performances globales de la plateforme de certification.</p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {statCards.map((stat, index) => (
           <motion.div
             key={stat.label}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: index * 0.1 }}
-            className="bg-[#0a0f1d] border border-[#7c3aed20] p-8 rounded-[2rem] hover:border-[#7c3aed50] transition-colors group relative overflow-hidden"
+            className="bg-[#0a0f1d] border border-[#7c3aed20] p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl hover:border-[#7c3aed50] transition-colors group relative overflow-hidden"
           >
-            <div className={`absolute top-0 right-0 w-32 h-32 ${stat.color} opacity-5 blur-[80px] -mr-16 -mt-16`} />
+            <div className={`absolute top-0 right-0 w-20 h-20 sm:w-24 sm:h-24 ${stat.color} opacity-5 blur-[50px] sm:blur-[60px] -mr-10 -mt-10 sm:-mr-12 sm:-mt-12`} />
             
-            <div className="flex items-center justify-between mb-6">
-              <div className={cn("p-4 rounded-2xl shadow-lg", stat.color)}>
-                <stat.icon size={24} className="text-white" />
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className={cn("p-2 sm:p-3 rounded-xl shadow-lg", stat.color)}>
+                <stat.icon size={16} className="text-white sm:size-20" />
               </div>
               <div className={cn(
-                "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border",
+                "px-2 sm:px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest border",
                 stat.trend === 'up' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-red-500/10 text-red-500 border-red-500/20"
               )}>
                 {stat.change}
               </div>
             </div>
 
-            <p className="text-[#64748b] text-[10px] uppercase font-black tracking-[0.2em] mb-1">{stat.label}</p>
-            <h3 className="text-4xl font-black text-white tracking-tighter">{stat.value}</h3>
+            <p className="text-[#64748b] text-[9px] sm:text-[10px] uppercase font-black tracking-[0.2em] mb-1">{stat.label}</p>
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tighter">{stat.value}</h3>
           </motion.div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        <div className="xl:col-span-2 bg-[#0a0f1d] border border-[#7c3aed10] rounded-[2.5rem] p-10">
-          <div className="flex items-center justify-between mb-10">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
+        <div className="xl:col-span-2 bg-[#0a0f1d] border border-[#7c3aed10] rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
             <div>
-              <h2 className="text-2xl font-black text-white tracking-tight uppercase">Activité Récente</h2>
-              <p className="text-xs text-[#64748b] font-medium mt-1">Dernières activités de la plateforme (certifications, quiz créés, inscriptions, tentatives).</p>
+              <h2 className="text-lg sm:text-xl md:text-2xl font-black text-white tracking-tight uppercase">Activité Récente</h2>
+              <p className="text-[10px] sm:text-xs text-[#64748b] font-medium mt-1">Dernières activités de la plateforme (certifications, quiz créés, inscriptions, tentatives).</p>
             </div>
-            <Link to="/admin/activity"  className="text-[10px] font-black text-[#7c3aed] uppercase tracking-widest hover:underline px-4 py-2 bg-[#7c3aed10] rounded-full">
+            <Link to="/admin/activity"  className="text-[9px] sm:text-[10px] font-black text-[#7c3aed] uppercase tracking-widest hover:underline px-3 sm:px-4 py-2 bg-[#7c3aed10] rounded-full">
               Voir tout
             </Link>
           </div>
           
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {recentActivity.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-[#64748b] font-medium">Aucune activité récente</p>
+              <div className="text-center py-8 sm:py-12">
+                <p className="text-[#64748b] text-sm sm:text-base font-medium">Aucune activité récente</p>
               </div>
             ) : (
-              recentActivity.slice(0, 3).map((activity) => (
-                <div key={activity.id} className="flex items-center justify-between p-5 rounded-3xl bg-[#0f172a50] border border-[#7c3aed05] hover:border-[#7c3aed20] transition-all group">
-                  <div className="flex items-center gap-4">
+              recentActivity['results'].slice(0, 3).map((activity) => (
+                <div key={activity.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-[#0f172a50] border border-[#7c3aed05] hover:border-[#7c3aed20] transition-all group">
+                  <div className="flex items-center gap-3 sm:gap-4">
                     <div className={cn(
-                      "w-12 h-12 rounded-xl flex items-center justify-center font-black text-white shadow-lg group-hover:scale-110 transition-transform",
+                      "w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center font-black text-white shadow-lg group-hover:scale-110 transition-transform",
                       activity.type === 'certification' && "bg-gradient-to-br from-[#7c3aed] to-[#4f46e5]",
                       activity.type === 'quiz_created' && "bg-gradient-to-br from-emerald-500 to-green-600",
                       activity.type === 'user_registered' && "bg-gradient-to-br from-blue-500 to-cyan-600",
                       activity.type === 'quiz_attempt' && "bg-gradient-to-br from-amber-500 to-orange-600"
                     )}>
-                      {activity.type === 'certification' && <Award size={20} />}
-                      {activity.type === 'quiz_created' && <BookOpen size={20} />}
-                      {activity.type === 'user_registered' && <UserPlus size={20} />}
-                      {activity.type === 'quiz_attempt' && <CheckCircle size={20} />}
+                      {activity.type === 'certification' && <Award size={16} className="sm:size-20" />}
+                      {activity.type === 'quiz_created' && <BookOpen size={16} className="sm:size-20" />}
+                      {activity.type === 'user_registered' && <UserPlus size={16} className="sm:size-20" />}
+                      {activity.type === 'quiz_attempt' && <CheckCircle size={16} className="sm:size-20" />}
                     </div>
                     <div>
-                      <p className="font-black text-white text-sm uppercase">
+                      <p className="font-black text-white text-xs sm:text-sm uppercase">
                         {activity.type === 'certification' && activity.user_name}
                         {activity.type === 'quiz_created' && 'Nouveau quiz créé'}
                         {activity.type === 'user_registered' && activity.user_name}
                         {activity.type === 'quiz_attempt' && activity.user_name}
                       </p>
-                      <p className="text-[10px] text-[#64748b] font-medium tracking-wider">
+                      <p className="text-[9px] sm:text-[10px] text-[#64748b] font-medium tracking-wider">
                         {activity.type === 'certification' && `A obtenu le badge ${activity.quiz_title}`}
                         {activity.type === 'quiz_created' && `${activity.quiz_title} (${activity.quiz_category})`}
                         {activity.type === 'user_registered' && `Nouvel étudiant inscrit: ${activity.user_email}`}
@@ -170,13 +170,13 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-[#64748b] text-[10px] font-mono">{activity.time_ago}</p>
+                    <p className="text-[#64748b] text-[9px] sm:text-[10px] font-mono">{activity.time_ago}</p>
                     {activity.type === 'certification' && (
-                      <p className="text-emerald-500 text-[10px] font-bold uppercase mt-1">Score: {activity.score}%</p>
+                      <p className="text-emerald-500 text-[9px] sm:text-[10px] font-bold uppercase mt-1">Score: {activity.score}%</p>
                     )}
                     {activity.type === 'quiz_attempt' && (
                       <p className={cn(
-                        "text-[10px] font-bold uppercase mt-1",
+                        "text-[9px] sm:text-[10px] font-bold uppercase mt-1",
                         activity.passed ? "text-emerald-500" : "text-red-500"
                       )}>
                         Score: {activity.score}%
@@ -189,14 +189,14 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-[#7c3aed] to-[#4f46e5] rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 blur-[100px] -mr-32 -mt-32" />
-          <UserPlus size={48} className="text-white/20 mb-6" />
-          <h2 className="text-3xl font-black tracking-tighter uppercase leading-tight mb-4">Besoin de plus de quiz ?</h2>
-          <p className="text-white/80 font-medium mb-10 leading-relaxed">Générez instantanément un nouveau parcours de certification avec notre outil de création assistée.</p>
+        <div className="bg-gradient-to-br from-[#7c3aed] to-[#4f46e5] rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 text-white relative overflow-hidden shadow-2xl">
+          <div className="absolute top-0 right-0 w-32 h-32 sm:w-48 sm:h-48 bg-white opacity-10 blur-[60px] sm:blur-[80px] -mr-16 -mt-16 sm:-mr-24 sm:-mt-24" />
+          <UserPlus size={28} className="text-white/20 mb-3 sm:mb-4 sm:size-36" />
+          <h2 className="text-lg sm:text-xl md:text-2xl font-black tracking-tighter uppercase leading-tight mb-2 sm:mb-3">Besoin de plus de quiz ?</h2>
+          <p className="text-white/80 text-xs sm:text-sm font-medium mb-4 sm:mb-6 leading-relaxed">Générez instantanément un nouveau parcours de certification avec notre outil de création assistée.</p>
           <button 
             onClick={() => navigate('/admin/quizzes')}
-            className="w-full py-5 bg-white text-[#7c3aed] rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl hover:-translate-y-1 transition-all active:scale-95"
+            className="w-full py-2.5 sm:py-3 md:py-4 bg-white text-[#7c3aed] rounded-xl sm:rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs shadow-xl hover:-translate-y-1 transition-all active:scale-95"
           >
             Créer un Quiz
           </button>

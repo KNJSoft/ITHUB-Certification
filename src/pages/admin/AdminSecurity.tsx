@@ -53,71 +53,71 @@ export const AdminSecurity: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-[#f8fafc]">Sécurité</h1>
-          <p className="text-[#94a3b8] mt-1">Gestion des appareils et adresses IP</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#f8fafc]">Sécurité</h1>
+          <p className="text-[#94a3b8] text-sm sm:text-base mt-1">Gestion des appareils et adresses IP</p>
         </div>
         <button
           onClick={loadSecurityData}
-          className="px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-lg flex items-center gap-2 transition-colors"
+          className="px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-lg flex items-center gap-2 transition-colors text-sm sm:text-base"
         >
-          <Activity size={18} />
+          <Activity size={16} />
           Actualiser
         </button>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-[#1e293b] p-6 rounded-xl border border-[#334155]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-[#1e293b] p-4 sm:p-6 rounded-xl border border-[#334155]">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[#94a3b8] text-sm">Total Appareils</p>
-              <p className="text-3xl font-bold text-[#f8fafc] mt-1">{securityData?.devices?.length || 0}</p>
+              <p className="text-[#94a3b8] text-xs sm:text-sm">Total Appareils</p>
+              <p className="text-2xl sm:text-3xl font-bold text-[#f8fafc] mt-1">{securityData?.devices?.length || 0}</p>
             </div>
-            <div className="w-12 h-12 bg-[#2563eb]/20 rounded-lg flex items-center justify-center">
-              <Smartphone className="text-[#2563eb]" size={24} />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#2563eb]/20 rounded-lg flex items-center justify-center">
+              <Smartphone className="text-[#2563eb]" size={18} />
             </div>
           </div>
         </div>
 
-        <div className="bg-[#1e293b] p-6 rounded-xl border border-[#334155]">
+        <div className="bg-[#1e293b] p-4 sm:p-6 rounded-xl border border-[#334155]">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[#94a3b8] text-sm">Appareils Actifs</p>
-              <p className="text-3xl font-bold text-[#f8fafc] mt-1">
+              <p className="text-[#94a3b8] text-xs sm:text-sm">Appareils Actifs</p>
+              <p className="text-2xl sm:text-3xl font-bold text-[#f8fafc] mt-1">
                 {securityData?.devices?.filter((d: any) => d.active).length || 0}
               </p>
             </div>
-            <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
-              <CheckCircle className="text-green-500" size={24} />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
+              <CheckCircle className="text-green-500" size={18} />
             </div>
           </div>
         </div>
 
-        <div className="bg-[#1e293b] p-6 rounded-xl border border-[#334155]">
+        <div className="bg-[#1e293b] p-4 sm:p-6 rounded-xl border border-[#334155]">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[#94a3b8] text-sm">Total IP</p>
-              <p className="text-3xl font-bold text-[#f8fafc] mt-1">{securityData?.ips?.length || 0}</p>
+              <p className="text-[#94a3b8] text-xs sm:text-sm">Total IP</p>
+              <p className="text-2xl sm:text-3xl font-bold text-[#f8fafc] mt-1">{securityData?.ips?.length || 0}</p>
             </div>
-            <div className="w-12 h-12 bg-[#f59e0b]/20 rounded-lg flex items-center justify-center">
-              <Globe className="text-[#f59e0b]" size={24} />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#f59e0b]/20 rounded-lg flex items-center justify-center">
+              <Globe className="text-[#f59e0b]" size={18} />
             </div>
           </div>
         </div>
 
-        <div className="bg-[#1e293b] p-6 rounded-xl border border-[#334155]">
+        <div className="bg-[#1e293b] p-4 sm:p-6 rounded-xl border border-[#334155]">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[#94a3b8] text-sm">Utilisateurs Uniques</p>
-              <p className="text-3xl font-bold text-[#f8fafc] mt-1">
+              <p className="text-[#94a3b8] text-xs sm:text-sm">Utilisateurs Uniques</p>
+              <p className="text-2xl sm:text-3xl font-bold text-[#f8fafc] mt-1">
                 {new Set([...(securityData?.devices?.map((d: any) => d.user) || []), ...(securityData?.ips?.map((i: any) => i.user) || [])]).size}
               </p>
             </div>
-            <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
-              <Shield className="text-purple-500" size={24} />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
+              <Shield className="text-purple-500" size={18} />
             </div>
           </div>
         </div>
@@ -128,69 +128,69 @@ export const AdminSecurity: React.FC = () => {
         <div className="flex border-b border-[#334155]">
           <button
             onClick={() => setActiveTab('devices')}
-            className={`px-6 py-4 font-medium transition-colors ${
+            className={`flex-1 sm:flex-none px-4 sm:px-6 py-3 sm:py-4 font-medium transition-colors text-xs sm:text-sm ${
               activeTab === 'devices'
                 ? 'text-[#2563eb] border-b-2 border-[#2563eb]'
                 : 'text-[#94a3b8] hover:text-[#f8fafc]'
             }`}
           >
-            <Smartphone size={18} className="inline mr-2" />
+            <Smartphone size={14} className="inline mr-1 sm:mr-2" />
             Appareils
           </button>
           <button
             onClick={() => setActiveTab('ips')}
-            className={`px-6 py-4 font-medium transition-colors ${
+            className={`flex-1 sm:flex-none px-4 sm:px-6 py-3 sm:py-4 font-medium transition-colors text-xs sm:text-sm ${
               activeTab === 'ips'
                 ? 'text-[#2563eb] border-b-2 border-[#2563eb]'
                 : 'text-[#94a3b8] hover:text-[#f8fafc]'
             }`}
           >
-            <Globe size={18} className="inline mr-2" />
+            <Globe size={14} className="inline mr-1 sm:mr-2" />
             Adresses IP
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {activeTab === 'devices' ? (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="text-left text-[#94a3b8] text-sm">
-                    <th className="pb-4 font-medium">Utilisateur</th>
-                    <th className="pb-4 font-medium">Appareil</th>
-                    <th className="pb-4 font-medium">OS</th>
-                    <th className="pb-4 font-medium">Navigateur</th>
-                    <th className="pb-4 font-medium">IP</th>
-                    <th className="pb-4 font-medium">Localisation</th>
-                    <th className="pb-4 font-medium">Dernière connexion</th>
-                    <th className="pb-4 font-medium">Statut</th>
+                  <tr className="text-left text-[#94a3b8] text-xs sm:text-sm">
+                    <th className="pb-3 sm:pb-4 font-medium">Utilisateur</th>
+                    <th className="pb-3 sm:pb-4 font-medium hidden sm:table-cell">Appareil</th>
+                    <th className="pb-3 sm:pb-4 font-medium hidden md:table-cell">OS</th>
+                    <th className="pb-3 sm:pb-4 font-medium hidden md:table-cell">Navigateur</th>
+                    <th className="pb-3 sm:pb-4 font-medium hidden lg:table-cell">IP</th>
+                    <th className="pb-3 sm:pb-4 font-medium hidden lg:table-cell">Localisation</th>
+                    <th className="pb-3 sm:pb-4 font-medium hidden md:table-cell">Dernière connexion</th>
+                    <th className="pb-3 sm:pb-4 font-medium">Statut</th>
                   </tr>
                 </thead>
-                <tbody className="text-[#f8fafc]">
+                <tbody className="text-[#f8fafc] text-xs sm:text-sm">
                   {securityData?.devices?.map((device: any) => (
                     <tr key={device.id} className="border-t border-[#334155]">
-                      <td className="py-4">{device.user}</td>
-                      <td className="py-4">{device.name}</td>
-                      <td className="py-4">{device.os}</td>
-                      <td className="py-4">{device.browser}</td>
-                      <td className="py-4">{device.ip_address || '-'}</td>
-                      <td className="py-4">{device.location || '-'}</td>
-                      <td className="py-4">{formatDate(device.last_login)}</td>
-                      <td className="py-4">
-                        <div className="flex items-center gap-2">
+                      <td className="py-3 sm:py-4">{device.user}</td>
+                      <td className="py-3 sm:py-4 hidden sm:table-cell">{device.name}</td>
+                      <td className="py-3 sm:py-4 hidden md:table-cell">{device.os}</td>
+                      <td className="py-3 sm:py-4 hidden md:table-cell">{device.browser}</td>
+                      <td className="py-3 sm:py-4 hidden lg:table-cell">{device.ip_address || '-'}</td>
+                      <td className="py-3 sm:py-4 hidden lg:table-cell">{device.location || '-'}</td>
+                      <td className="py-3 sm:py-4 hidden md:table-cell">{formatDate(device.last_login)}</td>
+                      <td className="py-3 sm:py-4">
+                        <div className="flex items-center gap-1 sm:gap-2">
                           {device.active ? (
-                            <span className="flex items-center gap-1 text-green-500 text-sm">
-                              <CheckCircle size={14} />
+                            <span className="flex items-center gap-1 text-green-500 text-xs sm:text-sm">
+                              <CheckCircle size={12} />
                               Actif
                             </span>
                           ) : (
-                            <span className="flex items-center gap-1 text-red-500 text-sm">
-                              <XCircle size={14} />
+                            <span className="flex items-center gap-1 text-red-500 text-xs sm:text-sm">
+                              <XCircle size={12} />
                               Inactif
                             </span>
                           )}
                           {device.is_primary && (
-                            <span className="px-2 py-1 bg-[#2563eb]/20 text-[#2563eb] text-xs rounded-full">
+                            <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-[#2563eb]/20 text-[#2563eb] text-[9px] sm:text-xs rounded-full">
                               Principal
                             </span>
                           )}
@@ -205,20 +205,20 @@ export const AdminSecurity: React.FC = () => {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="text-left text-[#94a3b8] text-sm">
-                    <th className="pb-4 font-medium">Utilisateur</th>
-                    <th className="pb-4 font-medium">Adresse IP</th>
-                    <th className="pb-4 font-medium">Date d'enregistrement</th>
-                    <th className="pb-4 font-medium">Device ID</th>
+                  <tr className="text-left text-[#94a3b8] text-xs sm:text-sm">
+                    <th className="pb-3 sm:pb-4 font-medium">Utilisateur</th>
+                    <th className="pb-3 sm:pb-4 font-medium">Adresse IP</th>
+                    <th className="pb-3 sm:pb-4 font-medium hidden sm:table-cell">Date d'enregistrement</th>
+                    <th className="pb-3 sm:pb-4 font-medium hidden md:table-cell">Device ID</th>
                   </tr>
                 </thead>
-                <tbody className="text-[#f8fafc]">
+                <tbody className="text-[#f8fafc] text-xs sm:text-sm">
                   {securityData?.ips?.map((ip: any) => (
                     <tr key={ip.id} className="border-t border-[#334155]">
-                      <td className="py-4">{ip.user}</td>
-                      <td className="py-4 font-mono">{ip.ip}</td>
-                      <td className="py-4">{formatDate(ip.created_at)}</td>
-                      <td className="py-4 font-mono text-sm">{ip.device_id || '-'}</td>
+                      <td className="py-3 sm:py-4">{ip.user}</td>
+                      <td className="py-3 sm:py-4 font-mono text-xs sm:text-sm">{ip.ip}</td>
+                      <td className="py-3 sm:py-4 hidden sm:table-cell">{formatDate(ip.created_at)}</td>
+                      <td className="py-3 sm:py-4 font-mono text-xs sm:text-sm hidden md:table-cell">{ip.device_id || '-'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -229,12 +229,12 @@ export const AdminSecurity: React.FC = () => {
       </div>
 
       {/* Blocked IPs/Devices Warning */}
-      <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-6">
-        <div className="flex items-start gap-3">
-          <AlertTriangle className="text-amber-500 flex-shrink-0 mt-1" size={20} />
+      <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 sm:p-6">
+        <div className="flex items-start gap-2 sm:gap-3">
+          <AlertTriangle className="text-amber-500 flex-shrink-0 mt-0.5 sm:mt-1" size={16} />
           <div>
-            <h3 className="text-amber-500 font-semibold mb-2">IP et Appareils bloqués</h3>
-            <p className="text-[#94a3b8] text-sm">
+            <h3 className="text-amber-500 text-sm sm:text-base font-semibold mb-1 sm:mb-2">IP et Appareils bloqués</h3>
+            <p className="text-[#94a3b8] text-xs sm:text-sm">
               Les IP et appareils qui dépassent le nombre de tentatives autorisées sont automatiquement bloqués pendant 5 minutes.
               Le rate limiting est géré côté frontend pour protéger contre les attaques par force brute.
             </p>

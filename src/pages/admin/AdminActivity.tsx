@@ -75,24 +75,24 @@ export const AdminActivity: React.FC = () => {
   }
 
   return (
-    <div className="space-y-10">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="space-y-6 sm:space-y-8">
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <div className="p-2 bg-[#7c3aed]/10 rounded-lg">
-              <Activity className="text-[#7c3aed]" size={28} />
+              <Activity className="text-[#7c3aed]" size={20} />
             </div>
-            <h1 className="text-4xl font-black tracking-tight text-white uppercase">Activité Récente</h1>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-white uppercase">Activité Récente</h1>
           </div>
-          <p className="text-[#64748b] font-medium tracking-wide mt-2">Historique complet des activités de la plateforme.</p>
+          <p className="text-[#64748b] text-sm sm:text-base font-medium tracking-wide mt-1 sm:mt-2">Historique complet des activités de la plateforme.</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <div className="relative">
-            <Filter size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748b]" />
+            <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748b]" />
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className="pl-10 pr-6 py-3 bg-[#0f172a] border border-[#7c3aed10] rounded-xl text-white font-bold focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40 appearance-none cursor-pointer"
+              className="pl-9 sm:pl-10 pr-4 sm:pr-6 py-2 sm:py-3 bg-[#0f172a] border border-[#7c3aed10] rounded-xl text-white font-bold focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40 appearance-none cursor-pointer text-xs sm:text-sm"
             >
               <option value="all">Toutes les activités</option>
               <option value="certification">Certifications</option>
@@ -106,11 +106,11 @@ export const AdminActivity: React.FC = () => {
         </div>
       </header>
 
-      <div className="bg-[#0a0f1d] border border-[#7c3aed10] rounded-[2.5rem] overflow-hidden shadow-2xl">
-        <div className="p-8 border-b border-[#7c3aed10] flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Calendar size={20} className="text-[#64748b]" />
-            <span className="text-[10px] font-black text-[#64748b] uppercase tracking-[0.2em]">
+      <div className="bg-[#0a0f1d] border border-[#7c3aed10] rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl">
+        <div className="p-4 sm:p-6 border-b border-[#7c3aed10] flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Calendar size={14} className="text-[#64748b]" />
+            <span className="text-[9px] sm:text-[10px] font-black text-[#64748b] uppercase tracking-[0.2em]">
               {pagination.total} activités trouvées
             </span>
           </div>
@@ -120,9 +120,9 @@ export const AdminActivity: React.FC = () => {
               disabled={pagination.page === 1}
               className="p-2 bg-[#0f172a] border border-[#7c3aed10] rounded-lg text-[#64748b] hover:text-white hover:border-[#7c3aed30] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              <ChevronLeft size={16} />
+              <ChevronLeft size={12} />
             </button>
-            <span className="text-[10px] font-black text-[#64748b] uppercase tracking-[0.2em] px-3">
+            <span className="text-[9px] sm:text-[10px] font-black text-[#64748b] uppercase tracking-[0.2em] px-2 sm:px-3">
               Page {pagination.page} / {pagination.total_pages}
             </span>
             <button
@@ -130,16 +130,16 @@ export const AdminActivity: React.FC = () => {
               disabled={pagination.page === pagination.total_pages}
               className="p-2 bg-[#0f172a] border border-[#7c3aed10] rounded-lg text-[#64748b] hover:text-white hover:border-[#7c3aed30] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              <ChevronRight size={16} />
+              <ChevronRight size={12} />
             </button>
           </div>
         </div>
 
-        <div className="p-8 space-y-4">
+        <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
           {filteredActivities.length === 0 ? (
-            <div className="text-center py-12">
-              <Activity size={48} className="text-[#64748b] mx-auto mb-4" />
-              <p className="text-[#64748b] font-medium">Aucune activité trouvée</p>
+            <div className="text-center py-8 sm:py-12">
+              <Activity size={28} className="text-[#64748b] mx-auto mb-3 sm:mb-4" />
+              <p className="text-[#64748b] text-sm sm:text-base font-medium">Aucune activité trouvée</p>
             </div>
           ) : (
             filteredActivities.map((activity) => (
@@ -147,11 +147,11 @@ export const AdminActivity: React.FC = () => {
                 key={activity.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center justify-between p-6 rounded-3xl bg-[#0f172a50] border border-[#7c3aed05] hover:border-[#7c3aed20] transition-all group"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-[#0f172a50] border border-[#7c3aed05] hover:border-[#7c3aed20] transition-all group"
               >
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <div className={cn(
-                    "w-14 h-14 rounded-xl flex items-center justify-center font-black text-white shadow-lg group-hover:scale-110 transition-transform",
+                    "w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center font-black text-white shadow-lg group-hover:scale-110 transition-transform",
                     activity.type === 'certification' && "bg-gradient-to-br from-[#7c3aed] to-[#4f46e5]",
                     activity.type === 'quiz_created' && "bg-gradient-to-br from-emerald-500 to-green-600",
                     activity.type === 'user_registered' && "bg-gradient-to-br from-blue-500 to-cyan-600",
@@ -159,15 +159,15 @@ export const AdminActivity: React.FC = () => {
                     activity.type === 'password_reset' && "bg-gradient-to-br from-rose-500 to-pink-600",
                     activity.type === 'email_verified' && "bg-gradient-to-br from-violet-500 to-purple-600"
                   )}>
-                    {activity.type === 'certification' && <Award size={24} />}
-                    {activity.type === 'quiz_created' && <BookOpen size={24} />}
-                    {activity.type === 'user_registered' && <UserPlus size={24} />}
-                    {activity.type === 'quiz_attempt' && <CheckCircle size={24} />}
-                    {activity.type === 'password_reset' && <Key size={24} />}
-                    {activity.type === 'email_verified' && <Mail size={24} />}
+                    {activity.type === 'certification' && <Award size={14} className="sm:size-20" />}
+                    {activity.type === 'quiz_created' && <BookOpen size={14} className="sm:size-20" />}
+                    {activity.type === 'user_registered' && <UserPlus size={14} className="sm:size-20" />}
+                    {activity.type === 'quiz_attempt' && <CheckCircle size={14} className="sm:size-20" />}
+                    {activity.type === 'password_reset' && <Key size={14} className="sm:size-20" />}
+                    {activity.type === 'email_verified' && <Mail size={14} className="sm:size-20" />}
                   </div>
                   <div>
-                    <p className="font-black text-white text-sm uppercase">
+                    <p className="font-black text-white text-[10px] sm:text-xs uppercase">
                       {activity.type === 'certification' && activity.user_name}
                       {activity.type === 'quiz_created' && 'Nouveau quiz créé'}
                       {activity.type === 'user_registered' && activity.user_name}
@@ -175,7 +175,7 @@ export const AdminActivity: React.FC = () => {
                       {activity.type === 'password_reset' && activity.user_name}
                       {activity.type === 'email_verified' && activity.user_name}
                     </p>
-                    <p className="text-[11px] text-[#64748b] font-medium tracking-wider">
+                    <p className="text-[9px] sm:text-[10px] text-[#64748b] font-medium tracking-wider">
                       {activity.type === 'certification' && `A obtenu le badge ${activity.quiz_title}`}
                       {activity.type === 'quiz_created' && `${activity.quiz_title} (${activity.quiz_category})`}
                       {activity.type === 'user_registered' && `Nouvel étudiant inscrit: ${activity.user_email}`}
@@ -186,13 +186,13 @@ export const AdminActivity: React.FC = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-[#64748b] text-[10px] font-mono">{activity.time_ago}</p>
+                  <p className="text-[#64748b] text-[9px] sm:text-[10px] font-mono">{activity.time_ago}</p>
                   {activity.type === 'certification' && (
-                    <p className="text-emerald-500 text-[11px] font-bold uppercase mt-1">Score: {activity.score}%</p>
+                    <p className="text-emerald-500 text-[10px] sm:text-[11px] font-bold uppercase mt-1">Score: {activity.score}%</p>
                   )}
                   {activity.type === 'quiz_attempt' && (
                     <p className={cn(
-                      "text-[11px] font-bold uppercase mt-1",
+                      "text-[10px] sm:text-[11px] font-bold uppercase mt-1",
                       activity.passed ? "text-emerald-500" : "text-red-500"
                     )}>
                       Score: {activity.score}%
