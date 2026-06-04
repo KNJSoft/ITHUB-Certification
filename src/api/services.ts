@@ -101,6 +101,34 @@ export const authService = {
       throw new Error(error.response?.data?.error || 'Erreur lors de la récupération du profil');
     }
   },
+
+  updateProfile: async (data: {
+    first_name?: string;
+    last_name?: string;
+    phone_number?: string;
+    country?: string;
+    country_code?: string;
+  }) => {
+    try {
+      const response = await api.patch('/auth/me/', data);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la mise à jour du profil');
+    }
+  },
+
+  changePassword: async (data: {
+    old_password: string;
+    new_password: string;
+    new_password_confirm: string;
+  }) => {
+    try {
+      const response = await api.post('/auth/change-password/', data);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Erreur lors du changement de mot de passe');
+    }
+  },
   
   refreshToken: async () => {
     const refreshToken = localStorage.getItem('refresh_token');

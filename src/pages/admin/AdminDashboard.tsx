@@ -199,7 +199,7 @@ export const AdminDashboard: React.FC = () => {
 
         <div className="bg-gradient-to-br from-[#7c3aed] to-[#4f46e5] rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 text-white relative overflow-hidden shadow-2xl">
           <div className="absolute top-0 right-0 w-32 h-32 sm:w-48 sm:h-48 bg-white opacity-10 blur-[60px] sm:blur-[80px] -mr-16 -mt-16 sm:-mr-24 sm:-mt-24" />
-          <UserPlus size={28} className="text-white/20 mb-3 sm:mb-4 sm:size-36" />
+          <UserPlus size={28} className="text-white/20 mb-3 sm:mb-4" />
           <h2 className="text-lg sm:text-xl md:text-2xl font-black tracking-tighter uppercase leading-tight mb-2 sm:mb-3">Besoin de plus de quiz ?</h2>
           <p className="text-white/80 text-xs sm:text-sm font-medium mb-4 sm:mb-6 leading-relaxed">Générez instantanément un nouveau parcours de certification avec notre outil de création assistée.</p>
           <button 
