@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://hubit.pythonanywhere.com/api/',
-  // baseURL: 'http://127.0.0.1:8000/api/',
+  // baseURL: 'https://hubit.pythonanywhere.com/api/',
+  baseURL: 'http://127.0.0.1:8000/api/',
   // https://hubit.pythonanywhere.com/
   headers: {
     'Content-Type': 'application/json',

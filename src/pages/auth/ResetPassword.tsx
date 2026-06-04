@@ -95,7 +95,7 @@ export const ResetPassword: React.FC = () => {
       >
         <div className="text-center mb-6 sm:mb-8">
           <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#2563eb] text-white mx-auto flex items-center justify-center mb-3 sm:mb-4 shadow-xl">
-            <Lock size={28} className="sm:size-32" />
+            <Lock size={28} />
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-[#f8fafc] tracking-tight">Réinitialiser le mot de passe</h1>
           <p className="text-[#94a3b8] mt-2 text-sm sm:text-base">
@@ -113,7 +113,7 @@ export const ResetPassword: React.FC = () => {
 
             {rateLimit.isBlocked && (
               <div className="bg-amber-500/10 border border-amber-500/20 text-amber-500 px-3 sm:px-4 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-medium flex items-center gap-2">
-                <AlertCircle size={14} className="sm:size-16" />
+                <AlertCircle size={14} />
                 <span className="text-xs sm:text-sm">Trop de tentatives. Réessayez dans {rateLimit.getTimeRemaining()} secondes.</span>
               </div>
             )}
@@ -135,7 +135,7 @@ export const ResetPassword: React.FC = () => {
               <label className="block text-xs sm:text-sm font-medium text-[#94a3b8] mb-1.5 sm:mb-2 px-1">Nouveau mot de passe</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none text-[#2563eb] group-focus-within:text-[#2563eb] transition-colors">
-                  <Lock size={16} className="sm:size-18" />
+                  <Lock size={16} />
                 </div>
                 <input
                   type="password"
@@ -152,7 +152,7 @@ export const ResetPassword: React.FC = () => {
               <label className="block text-xs sm:text-sm font-medium text-[#94a3b8] mb-1.5 sm:mb-2 px-1">Confirmer le mot de passe</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none text-[#2563eb] group-focus-within:text-[#2563eb] transition-colors">
-                  <Lock size={16} className="sm:size-18" />
+                  <Lock size={16} />
                 </div>
                 <input
                   type="password"

@@ -87,7 +87,7 @@ export const VerifyEmail: React.FC = () => {
         >
           <div className="bg-[#1e293b] p-6 sm:p-8 rounded-3xl border border-[#334155] shadow-2xl text-center">
             <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-green-500/20 text-green-500 mx-auto flex items-center justify-center mb-4 sm:mb-6">
-              <CheckCircle size={32} className="sm:size-40" />
+              <CheckCircle size={32} />
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-[#f8fafc] mb-2">Email vérifié !</h1>
             <p className="text-[#94a3b8] text-sm sm:text-base">Votre compte a été activé avec succès. Redirection en cours...</p>
@@ -111,7 +111,7 @@ export const VerifyEmail: React.FC = () => {
       >
         <div className="text-center mb-6 sm:mb-8">
           <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#2563eb] text-white mx-auto flex items-center justify-center mb-3 sm:mb-4 shadow-xl">
-            <Mail size={28} className="sm:size-32" />
+            <Mail size={28} />
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-[#f8fafc] tracking-tight">Vérifier votre email</h1>
           <p className="text-[#94a3b8] mt-2 text-sm sm:text-base">

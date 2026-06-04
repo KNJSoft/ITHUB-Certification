@@ -19,7 +19,7 @@ export const AdminNotFound: React.FC = () => {
         className="w-full max-w-md relative z-10 text-center"
       >
         <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-[#7c3aed]/20 text-[#7c3aed] mx-auto flex items-center justify-center mb-6 sm:mb-8">
-          <AlertCircle size={48} className="sm:size-64" />
+          <AlertCircle size={48} />
         </div>
 
         <h1 className="text-6xl sm:text-7xl md:text-8xl font-black text-[#f8fafc] mb-3 sm:mb-4">404</h1>
@@ -33,7 +33,7 @@ export const AdminNotFound: React.FC = () => {
             onClick={() => navigate(-1)}
             className="px-4 sm:px-6 py-2.5 sm:py-3 bg-[#1e293b] hover:bg-[#334155] text-[#f8fafc] font-bold rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 text-sm sm:text-base"
           >
-            <ArrowLeft size={16} className="sm:size-18" />
+            <ArrowLeft size={16} />
             <span>Retour</span>
           </button>
 
@@ -41,7 +41,7 @@ export const AdminNotFound: React.FC = () => {
             to="/admin/dashboard"
             className="px-4 sm:px-6 py-2.5 sm:py-3 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-[#7c3aed]/20 text-sm sm:text-base"
           >
-            <LayoutDashboard size={16} className="sm:size-18" />
+            <LayoutDashboard size={16} />
             <span>Dashboard Admin</span>
           </Link>
         </div>

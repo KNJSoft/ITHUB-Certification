@@ -107,7 +107,7 @@ export const Dashboard: React.FC = () => {
             className="bg-[#1e293b] border border-[#334155] rounded-[1.5rem] sm:rounded-[2rem] p-4 sm:p-6 hover:border-[#334155]/50 transition-all"
           >
             <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center mb-3 sm:mb-4", stat.bgColor, stat.borderColor, "border")}>
-              <stat.icon size={20} className={cn("text-white sm:size-24")} />
+              <stat.icon size={20} className={cn("text-white")} />
             </div>
             <p className="text-[9px] sm:text-[10px] uppercase font-bold text-[#64748b] tracking-widest mb-1.5 sm:mb-2">{stat.label}</p>
             <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">{stat.value}</h3>
@@ -119,15 +119,15 @@ export const Dashboard: React.FC = () => {
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 sm:mb-6">
           <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight uppercase">Quiz Disponibles</h2>
-          <button className="text-[10px] font-black text-[#2563eb] uppercase tracking-widest hover:underline px-3 sm:px-4 py-2 bg-[#2563eb]/10 rounded-full">
+          {/* <button className="text-[10px] font-black text-[#2563eb] uppercase tracking-widest hover:underline px-3 sm:px-4 py-2 bg-[#2563eb]/10 rounded-full">
             Voir tout
-          </button>
+          </button> */}
         </div>
 
         {quizzes.length === 0 ? (
           <div className="flex items-center justify-center h-[40vh]">
             <div className="text-center">
-              <BookOpen size={40} className="text-[#64748b] mx-auto mb-4 sm:size-48" />
+              <BookOpen size={40} className="text-[#64748b] mx-auto mb-48" />
               <p className="text-[#94a3b8] text-sm sm:text-base md:text-lg">Aucun quiz disponible pour le moment</p>
             </div>
           </div>
@@ -158,7 +158,7 @@ export const Dashboard: React.FC = () => {
                     </div>
                     {expired && (
                       <div className="bg-red-500/10 text-red-500 px-2 sm:px-3 py-1 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest border border-red-500/20 flex items-center gap-1">
-                        <AlertCircle size={6} className="sm:size-8" /> Expiré
+                        <AlertCircle size={6} /> Expiré
                       </div>
                     )}
                   </div>
@@ -170,14 +170,14 @@ export const Dashboard: React.FC = () => {
                     <div className="bg-[#0f172a] rounded-xl p-2 sm:p-3 border border-[#334155]/50">
                       <p className="text-[8px] sm:text-[9px] uppercase font-bold text-[#64748b] tracking-widest mb-1">Questions</p>
                       <div className="flex items-center gap-1.5 sm:gap-2 font-bold text-[#f8fafc] text-xs sm:text-sm">
-                        <BookOpen size={10} className="text-[#2563eb] sm:size-12" />
+                        <BookOpen size={10} className="text-[#2563eb]" />
                         <span>{quiz?.questions.length || 'N/A'}</span>
                       </div>
                     </div>
                     <div className="bg-[#0f172a] rounded-xl p-2 sm:p-3 border border-[#334155]/50">
                       <p className="text-[8px] sm:text-[9px] uppercase font-bold text-[#64748b] tracking-widest mb-1">Essais</p>
                       <div className="flex items-center gap-1.5 sm:gap-2 font-bold text-[#f8fafc] text-xs sm:text-sm">
-                        <Star size={10} className="text-amber-500 sm:size-12" />
+                        <Star size={10} className="text-amber-500 " />
                         <span>{attemptsRemaining} / {quiz.max_attempts}</span>
                       </div>
                     </div>
@@ -195,7 +195,7 @@ export const Dashboard: React.FC = () => {
                   >
                     {expired ? "ACCÈS FERMÉ" : attemptsRemaining === 0 ? "PLUS D'ESSAIS" : (
                       <>
-                        <Play size={14} className="sm:size-16" fill="currentColor" />
+                        <Play size={14} fill="currentColor" />
                         <span>Lancer</span>
                       </>
                     )}

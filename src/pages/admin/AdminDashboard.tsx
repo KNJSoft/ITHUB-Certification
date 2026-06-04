@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { adminService } from '../../api/services';
 import { AdminStats } from '../../api/types';
-import { Users, Award, TrendingUp, BarChart3, Zap, ChevronRight, UserPlus, BookOpen, CheckCircle } from 'lucide-react';
+import { Users, Award, TrendingUp, BarChart3, Zap, ChevronRight, UserPlus, BookOpen, CheckCircle, Key, Mail } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '../../lib/utils';
 
@@ -105,7 +105,7 @@ export const AdminDashboard: React.FC = () => {
             
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <div className={cn("p-2 sm:p-3 rounded-xl shadow-lg", stat.color)}>
-                <stat.icon size={16} className="text-white sm:size-20" />
+                <stat.icon size={16} className="text-white" />
               </div>
               <div className={cn(
                 "px-2 sm:px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest border",
@@ -147,12 +147,16 @@ export const AdminDashboard: React.FC = () => {
                       activity.type === 'certification' && "bg-gradient-to-br from-[#7c3aed] to-[#4f46e5]",
                       activity.type === 'quiz_created' && "bg-gradient-to-br from-emerald-500 to-green-600",
                       activity.type === 'user_registered' && "bg-gradient-to-br from-blue-500 to-cyan-600",
-                      activity.type === 'quiz_attempt' && "bg-gradient-to-br from-amber-500 to-orange-600"
+                      activity.type === 'quiz_attempt' && "bg-gradient-to-br from-amber-500 to-orange-600",
+                      activity.type === 'password_reset' && "bg-gradient-to-br from-rose-500 to-pink-600",
+                      activity.type === 'email_verified' && "bg-gradient-to-br from-violet-500 to-purple-600"
                     )}>
-                      {activity.type === 'certification' && <Award size={16} className="sm:size-20" />}
-                      {activity.type === 'quiz_created' && <BookOpen size={16} className="sm:size-20" />}
-                      {activity.type === 'user_registered' && <UserPlus size={16} className="sm:size-20" />}
-                      {activity.type === 'quiz_attempt' && <CheckCircle size={16} className="sm:size-20" />}
+                      {activity.type === 'certification' && <Award size={16} />}
+                      {activity.type === 'quiz_created' && <BookOpen size={16} />}
+                      {activity.type === 'user_registered' && <UserPlus size={16} />}
+                      {activity.type === 'quiz_attempt' && <CheckCircle size={16} />}
+                      {activity.type === 'password_reset' && <Key size={14} />}
+                      {activity.type === 'email_verified' && <Mail size={14} />}
                     </div>
                     <div>
                       <p className="font-black text-white text-xs sm:text-sm uppercase">
@@ -160,12 +164,16 @@ export const AdminDashboard: React.FC = () => {
                         {activity.type === 'quiz_created' && 'Nouveau quiz créé'}
                         {activity.type === 'user_registered' && activity.user_name}
                         {activity.type === 'quiz_attempt' && activity.user_name}
+                        {activity.type === 'password_reset' && activity.user_name}
+                        {activity.type === 'email_verified' && activity.user_name}
                       </p>
                       <p className="text-[9px] sm:text-[10px] text-[#64748b] font-medium tracking-wider">
                         {activity.type === 'certification' && `A obtenu le badge ${activity.quiz_title}`}
                         {activity.type === 'quiz_created' && `${activity.quiz_title} (${activity.quiz_category})`}
                         {activity.type === 'user_registered' && `Nouvel étudiant inscrit: ${activity.user_email}`}
                         {activity.type === 'quiz_attempt' && `Tentative: ${activity.quiz_title} - ${activity.passed ? 'Réussi' : 'Échoué'}`}
+                        {activity.type === 'password_reset' && `Demande de réinitialisation: ${activity.user_email}`}
+                        {activity.type === 'email_verified' && `Email vérifié: ${activity.user_email}`}
                       </p>
                     </div>
                   </div>

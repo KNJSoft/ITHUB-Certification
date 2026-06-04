@@ -28,12 +28,12 @@ export const Profile: React.FC = () => {
                   className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-[1.5rem] sm:rounded-[2rem] object-cover shadow-xl shadow-[#2563eb]/20 group-hover:scale-105 transition-transform"
                 />
               ) : (
-                <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-[1.5rem] sm:rounded-[2rem] bg-gradient-to-br from-[#2563eb] to-[#4f46e5] flex items-center justify-center font-black text-white text-3xl sm:text-4xl md:text-5xl shadow-xl shadow-[#2563eb]/20 group-hover:scale-105 transition-transform">
+                <div className="w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-[1.5rem] sm:rounded-[2rem] bg-gradient-to-br from-[#2563eb] to-[#4f46e5] flex items-center justify-center font-black text-white text-3xl sm:text-4xl md:text-5xl shadow-xl shadow-[#2563eb]/20 group-hover:scale-105 transition-transform">
                   {initials}
                 </div>
               )}
               <button className="absolute bottom-0 right-0 p-2 sm:p-3 bg-white text-[#2563eb] rounded-xl shadow-lg hover:scale-110 transition-all">
-                <Camera size={14} className="sm:size-18" />
+                <Camera size={14}/>
               </button>
             </div>
             
@@ -71,28 +71,28 @@ export const Profile: React.FC = () => {
               <div className="space-y-2">
                 <label className="text-[9px] sm:text-[10px] font-black text-[#64748b] uppercase tracking-widest ml-1">Prénom</label>
                 <div className="flex items-center gap-3 sm:gap-4 bg-[#0f172a] border border-[#2563eb10] p-3 sm:p-4 rounded-2xl">
-                  <User size={14} className="text-[#2563eb] sm:size-18" />
+                  <User size={14} className="text-[#2563eb] " />
                   <span className="text-white font-bold text-sm sm:text-base">{user?.first_name || 'N/A'}</span>
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[9px] sm:text-[10px] font-black text-[#64748b] uppercase tracking-widest ml-1">Nom</label>
                 <div className="flex items-center gap-3 sm:gap-4 bg-[#0f172a] border border-[#2563eb10] p-3 sm:p-4 rounded-2xl">
-                  <User size={14} className="text-[#2563eb] sm:size-18" />
+                  <User size={14} className="text-[#2563eb] " />
                   <span className="text-white font-bold text-sm sm:text-base">{user?.last_name || 'N/A'}</span>
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[9px] sm:text-[10px] font-black text-[#64748b] uppercase tracking-widest ml-1">Email</label>
                 <div className="flex items-center gap-3 sm:gap-4 bg-[#0f172a] border border-[#2563eb10] p-3 sm:p-4 rounded-2xl">
-                  <Mail size={14} className="text-[#2563eb] sm:size-18" />
+                  <Mail size={14} className="text-[#2563eb] " />
                   <span className="text-white font-bold text-sm sm:text-base">{user?.email || 'N/A'}</span>
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[9px] sm:text-[10px] font-black text-[#64748b] uppercase tracking-widest ml-1">Rôle</label>
                 <div className="flex items-center gap-3 sm:gap-4 bg-[#0f172a] border border-[#2563eb10] p-3 sm:p-4 rounded-2xl">
-                  <Award size={14} className="text-[#2563eb] sm:size-18" />
+                  <Award size={14} className="text-[#2563eb] " />
                   <span className="text-white font-bold capitalize text-sm sm:text-base">{user?.role || 'N/A'}</span>
                 </div>
               </div>
@@ -100,7 +100,7 @@ export const Profile: React.FC = () => {
                 <div className="space-y-2">
                   <label className="text-[9px] sm:text-[10px] font-black text-[#64748b] uppercase tracking-widest ml-1">Téléphone</label>
                   <div className="flex items-center gap-3 sm:gap-4 bg-[#0f172a] border border-[#2563eb10] p-3 sm:p-4 rounded-2xl">
-                    <Phone size={14} className="text-[#2563eb] sm:size-18" />
+                    <Phone size={14} className="text-[#2563eb] " />
                     <span className="text-white font-bold text-sm sm:text-base">{user.phone_number}</span>
                   </div>
                 </div>
@@ -109,7 +109,7 @@ export const Profile: React.FC = () => {
                 <div className="space-y-2">
                   <label className="text-[9px] sm:text-[10px] font-black text-[#64748b] uppercase tracking-widest ml-1">Pays</label>
                   <div className="flex items-center gap-3 sm:gap-4 bg-[#0f172a] border border-[#2563eb10] p-3 sm:p-4 rounded-2xl">
-                    <Globe size={14} className="text-[#2563eb] sm:size-18" />
+                    <Globe size={14} className="text-[#2563eb] " />
                     <span className="text-white font-bold text-sm sm:text-base">{user.country} {user.country_code && `(${user.country_code})`}</span>
                   </div>
                 </div>
@@ -123,7 +123,7 @@ export const Profile: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-[#0a0f1d] border border-[#2563eb10] p-6 sm:p-8 md:p-10 rounded-[1.5rem] sm:rounded-[2rem] md:rounded-[2.5rem] shadow-2xl">
+          {/* <div className="bg-[#0a0f1d] border border-[#2563eb10] p-6 sm:p-8 md:p-10 rounded-[1.5rem] sm:rounded-[2rem] md:rounded-[2.5rem] shadow-2xl">
              <h2 className="text-lg sm:text-xl font-black text-white uppercase tracking-widest mb-6 sm:mb-8 flex items-center gap-2 sm:gap-3">
               <Bell className="text-[#2563eb]" size={16} />
               Notifications
@@ -149,7 +149,7 @@ export const Profile: React.FC = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

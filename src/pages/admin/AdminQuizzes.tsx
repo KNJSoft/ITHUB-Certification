@@ -237,7 +237,7 @@ export const AdminQuizzes: React.FC = () => {
           }}
           className="flex items-center justify-center gap-2 sm:gap-3 bg-[#7c3aed] hover:bg-[#6d28d9] text-white px-6 sm:px-8 md:px-10 py-3 sm:py-4 md:py-5 rounded-2xl font-black text-[10px] sm:text-sm uppercase tracking-widest transition-all shadow-xl shadow-[#7c3aed]/20 group active:scale-95"
         >
-          <Plus size={16} className="sm:size-20 group-hover:rotate-90 transition-transform duration-300" />
+          <Plus size={16} className="group-hover:rotate-90 transition-transform duration-300" />
           <span>Nouveau Quiz</span>
         </button>
       </header>
@@ -275,7 +275,7 @@ export const AdminQuizzes: React.FC = () => {
                   <td className="px-4 sm:px-8 md:px-10 py-4 sm:py-6 md:py-8">
                     <div className="flex items-center gap-3 sm:gap-5">
                       <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#7c3aed10] rounded-2xl flex items-center justify-center text-[#7c3aed] border border-[#7c3aed15] group-hover:scale-110 transition-transform">
-                        <BookOpen size={16} className="sm:size-24" />
+                        <BookOpen size={16} />
                       </div>
                       <div>
                         <p className="font-black text-white group-hover:text-[#7c3aed] transition-colors text-xs sm:text-sm md:text-base">{quiz.title}</p>
@@ -290,19 +290,19 @@ export const AdminQuizzes: React.FC = () => {
                   </td>
                   <td className="px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8 text-center hidden md:table-cell">
                     <div className="flex flex-col items-center gap-1">
-                      <Calendar size={12} className="text-[#64748b] sm:size-14" />
+                      <Calendar size={12} className="text-[#64748b]" />
                       <span className="text-[10px] sm:text-[11px] font-bold text-[#94a3b8]">{new Date(quiz.expiration_date).toLocaleDateString('fr-FR')}</span>
                     </div>
                   </td>
                   <td className="px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8 text-center hidden sm:table-cell">
                     <div className="flex items-center justify-center gap-1 sm:gap-1.5 text-white font-mono font-bold">
-                       <Star size={12} className="text-amber-500 fill-amber-500 sm:size-14" />
+                       <Star size={12} className="text-amber-500 fill-amber-500" />
                        <span>{quiz.max_attempts}</span>
                     </div>
                   </td>
                   <td className="px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8 text-center hidden sm:table-cell">
                     <div className="flex items-center justify-center gap-1 sm:gap-1.5 text-emerald-500 font-mono font-bold">
-                       <Award size={12} className="sm:size-14" />
+                       <Award size={12}/>
                        <span>{quiz.attempts_count || 0}</span>
                     </div>
                   </td>
@@ -317,13 +317,13 @@ export const AdminQuizzes: React.FC = () => {
                         onClick={() => handleEditQuiz(quiz)}
                         className="p-2 sm:p-3 bg-[#0a0f1d] hover:bg-[#7c3aed] text-[#64748b] hover:text-white rounded-xl border border-[#7c3aed10] transition-all shadow-sm"
                       >
-                        <Edit2 size={14} className="sm:size-18" />
+                        <Edit2 size={14} />
                       </button>
                       <button
                         onClick={() => handleDelete(quiz.id)}
                         className="p-2 sm:p-3 bg-[#0a0f1d] hover:bg-red-500 text-[#64748b] hover:text-white rounded-xl border border-[#7c3aed10] transition-all shadow-sm"
                       >
-                        <Trash size={14} className="sm:size-18" />
+                        <Trash size={14} />
                       </button>
                     </div>
                   </td>
