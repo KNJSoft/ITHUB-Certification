@@ -159,12 +159,12 @@ export const AdminActivity: React.FC = () => {
                     activity.type === 'password_reset' && "bg-gradient-to-br from-rose-500 to-pink-600",
                     activity.type === 'email_verified' && "bg-gradient-to-br from-violet-500 to-purple-600"
                   )}>
-                    {activity.type === 'certification' && <Award size={14} className="sm:size-20" />}
-                    {activity.type === 'quiz_created' && <BookOpen size={14} className="sm:size-20" />}
-                    {activity.type === 'user_registered' && <UserPlus size={14} className="sm:size-20" />}
-                    {activity.type === 'quiz_attempt' && <CheckCircle size={14} className="sm:size-20" />}
-                    {activity.type === 'password_reset' && <Key size={14} className="sm:size-20" />}
-                    {activity.type === 'email_verified' && <Mail size={14} className="sm:size-20" />}
+                    {activity.type === 'certification' && <Award size={14} />}
+                    {activity.type === 'quiz_created' && <BookOpen size={14} />}
+                    {activity.type === 'user_registered' && <UserPlus size={14} />}
+                    {activity.type === 'quiz_attempt' && <CheckCircle size={14} />}
+                    {activity.type === 'password_reset' && <Key size={14} />}
+                    {activity.type === 'email_verified' && <Mail size={14} />}
                   </div>
                   <div>
                     <p className="font-black text-white text-[10px] sm:text-xs uppercase">

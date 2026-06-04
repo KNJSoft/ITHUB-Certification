@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { adminService } from '../../api/services';
 import { AdminStats } from '../../api/types';
-import { Users, Award, TrendingUp, BarChart3, Zap, ChevronRight, UserPlus, BookOpen, CheckCircle } from 'lucide-react';
+import { Users, Award, TrendingUp, BarChart3, Zap, ChevronRight, UserPlus, BookOpen, CheckCircle, Key, Mail } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '../../lib/utils';
 
@@ -105,7 +105,7 @@ export const AdminDashboard: React.FC = () => {
             
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <div className={cn("p-2 sm:p-3 rounded-xl shadow-lg", stat.color)}>
-                <stat.icon size={16} className="text-white sm:size-20" />
+                <stat.icon size={16} className="text-white" />
               </div>
               <div className={cn(
                 "px-2 sm:px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest border",
@@ -147,12 +147,16 @@ export const AdminDashboard: React.FC = () => {
                       activity.type === 'certification' && "bg-gradient-to-br from-[#7c3aed] to-[#4f46e5]",
                       activity.type === 'quiz_created' && "bg-gradient-to-br from-emerald-500 to-green-600",
                       activity.type === 'user_registered' && "bg-gradient-to-br from-blue-500 to-cyan-600",
-                      activity.type === 'quiz_attempt' && "bg-gradient-to-br from-amber-500 to-orange-600"
+                      activity.type === 'quiz_attempt' && "bg-gradient-to-br from-amber-500 to-orange-600",
+                      activity.type === 'password_reset' && "bg-gradient-to-br from-rose-500 to-pink-600",
+                      activity.type === 'email_verified' && "bg-gradient-to-br from-violet-500 to-purple-600"
                     )}>
-                      {activity.type === 'certification' && <Award size={16} className="sm:size-20" />}
-                      {activity.type === 'quiz_created' && <BookOpen size={16} className="sm:size-20" />}
-                      {activity.type === 'user_registered' && <UserPlus size={16} className="sm:size-20" />}
-                      {activity.type === 'quiz_attempt' && <CheckCircle size={16} className="sm:size-20" />}
+                      {activity.type === 'certification' && <Award size={16} />}
+                      {activity.type === 'quiz_created' && <BookOpen size={16} />}
+                      {activity.type === 'user_registered' && <UserPlus size={16} />}
+                      {activity.type === 'quiz_attempt' && <CheckCircle size={16} />}
+                      {activity.type === 'password_reset' && <Key size={14} />}
+                      {activity.type === 'email_verified' && <Mail size={14} />}
                     </div>
                     <div>
                       <p className="font-black text-white text-xs sm:text-sm uppercase">
@@ -160,12 +164,16 @@ export const AdminDashboard: React.FC = () => {
                         {activity.type === 'quiz_created' && 'Nouveau quiz créé'}
                         {activity.type === 'user_registered' && activity.user_name}
                         {activity.type === 'quiz_attempt' && activity.user_name}
+                        {activity.type === 'password_reset' && activity.user_name}
+                        {activity.type === 'email_verified' && activity.user_name}
                       </p>
                       <p className="text-[9px] sm:text-[10px] text-[#64748b] font-medium tracking-wider">
                         {activity.type === 'certification' && `A obtenu le badge ${activity.quiz_title}`}
                         {activity.type === 'quiz_created' && `${activity.quiz_title} (${activity.quiz_category})`}
                         {activity.type === 'user_registered' && `Nouvel étudiant inscrit: ${activity.user_email}`}
                         {activity.type === 'quiz_attempt' && `Tentative: ${activity.quiz_title} - ${activity.passed ? 'Réussi' : 'Échoué'}`}
+                        {activity.type === 'password_reset' && `Demande de réinitialisation: ${activity.user_email}`}
+                        {activity.type === 'email_verified' && `Email vérifié: ${activity.user_email}`}
                       </p>
                     </div>
                   </div>
@@ -191,7 +199,7 @@ export const AdminDashboard: React.FC = () => {
 
         <div className="bg-gradient-to-br from-[#7c3aed] to-[#4f46e5] rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 text-white relative overflow-hidden shadow-2xl">
           <div className="absolute top-0 right-0 w-32 h-32 sm:w-48 sm:h-48 bg-white opacity-10 blur-[60px] sm:blur-[80px] -mr-16 -mt-16 sm:-mr-24 sm:-mt-24" />
-          <UserPlus size={28} className="text-white/20 mb-3 sm:mb-4 sm:size-36" />
+          <UserPlus size={28} className="text-white/20 mb-3 sm:mb-4" />
           <h2 className="text-lg sm:text-xl md:text-2xl font-black tracking-tighter uppercase leading-tight mb-2 sm:mb-3">Besoin de plus de quiz ?</h2>
           <p className="text-white/80 text-xs sm:text-sm font-medium mb-4 sm:mb-6 leading-relaxed">Générez instantanément un nouveau parcours de certification avec notre outil de création assistée.</p>
           <button 

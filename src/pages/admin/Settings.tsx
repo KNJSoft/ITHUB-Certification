@@ -18,7 +18,7 @@ export const AdminSettings: React.FC = () => {
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 sm:gap-8">
-        <div className="md:col-span-1 space-y-2">
+        {/* <div className="md:col-span-1 space-y-2">
           {[
             { label: 'Général', icon: Globe, active: true },
             { label: 'Sécurité', icon: Lock },
@@ -35,11 +35,11 @@ export const AdminSettings: React.FC = () => {
                   : "text-[#64748b] hover:bg-[#7c3aed10] hover:text-[#7c3aed]"
               )}
             >
-              <item.icon size={14} className="sm:size-16" />
+              <item.icon size={14} />
               {item.label}
             </button>
           ))}
-        </div>
+        </div> */}
 
         <div className="md:col-span-3 space-y-6 sm:space-y-8">
           <div className="bg-[#0a0f1d] border border-[#7c3aed10] rounded-[1.5rem] sm:rounded-[2rem] md:rounded-[2.5rem] p-6 sm:p-8 md:p-10 shadow-2xl">
@@ -105,7 +105,7 @@ export const AdminSettings: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-red-500/5 border border-red-500/10 rounded-[1.5rem] sm:rounded-[2rem] md:rounded-[2.5rem] p-6 sm:p-8 md:p-10">
+          {/* <div className="bg-red-500/5 border border-red-500/10 rounded-[1.5rem] sm:rounded-[2rem] md:rounded-[2.5rem] p-6 sm:p-8 md:p-10">
              <h2 className="text-xs sm:text-sm font-black text-red-500 uppercase tracking-widest mb-4 sm:mb-6">Zone de danger</h2>
              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
@@ -116,7 +116,7 @@ export const AdminSettings: React.FC = () => {
                   Réinitialiser
                 </button>
              </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

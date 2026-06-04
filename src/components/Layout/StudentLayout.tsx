@@ -17,7 +17,7 @@ export const StudentLayout: React.FC = () => {
 
   const navItems = [
     { name: 'Dashboard', path: '/app/dashboard', icon: LayoutDashboard },
-    { name: 'Mes Quiz', path: '/app/quizzes', icon: BookOpen }, // Added as requested
+    // { name: 'Mes Quiz', path: '/app/quizzes', icon: BookOpen }, // Added as requested
     { name: 'Certifications', path: '/app/certifications', icon: Award },
     { name: 'Profil', path: '/app/profile', icon: User },
   ];
@@ -47,7 +47,7 @@ export const StudentLayout: React.FC = () => {
         <div className="p-6 sm:p-8 flex items-center gap-3 justify-between lg:justify-start">
           <div className="flex items-center gap-3">
             <div className="bg-[#2563eb] p-2 rounded-xl shadow-lg shadow-[#2563eb]/20">
-              <Code2 size={20} className="text-white sm:size-24" />
+              <Code2 size={20} className="text-white" />
             </div>
             <span className="font-bold text-xl sm:text-2xl tracking-tighter">IT HUB</span>
           </div>
@@ -74,7 +74,7 @@ export const StudentLayout: React.FC = () => {
                 )
               }
             >
-              <item.icon size={18} className="sm:size-20" />
+              <item.icon size={18} />
               <span className="font-semibold text-xs sm:text-sm">{item.name}</span>
             </NavLink>
           ))}
@@ -85,7 +85,7 @@ export const StudentLayout: React.FC = () => {
             onClick={handleLogout}
             className="w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-[#ef4444] hover:bg-[#ef444410] transition-all duration-200"
           >
-            <LogOut size={16} className="sm:size-20" />
+            <LogOut size={16} />
             <span className="font-bold text-xs sm:text-sm">Déconnexion</span>
           </button>
         </div>
@@ -111,11 +111,11 @@ export const StudentLayout: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3 sm:gap-6">
-            <button className="p-2 text-[#94a3b8] hover:text-white transition-colors relative">
-               <Bell size={18} className="sm:size-20" />
+            {/* <button className="p-2 text-[#94a3b8] hover:text-white transition-colors relative">
+               <Bell size={18} />
                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#2563eb] rounded-full border-2 border-[#0f172a]" />
-            </button>
-            <div className="flex items-center gap-2 sm:gap-3 group cursor-pointer">
+            </button> */}
+            <div onClick={() => navigate('/app/profile')} className="flex items-center gap-2 sm:gap-3 group cursor-pointer">
               <div className="text-right hidden sm:block">
                 <p className="text-[10px] sm:text-xs font-bold text-[#f8fafc]">{user?.first_name} {user?.last_name}</p>
                 <p className="text-[9px] sm:text-[10px] text-[#94a3b8]">Student Level 1</p>

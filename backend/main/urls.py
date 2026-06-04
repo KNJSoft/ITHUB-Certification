@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (
-    RegisterView, LoginView, ProfileView, token_refresh, verify_email, forgot_password, reset_password,
+    RegisterView, LoginView, ProfileView, ChangePasswordView, token_refresh, verify_email, forgot_password, reset_password,
     QuizListView, QuizDetailView, QuizAttemptView,
     CertificationListView, certification_png, certification_pdf,
     admin_stats, recent_activity, security_data, UserListView, UserCreateView, UserUpdateView, UserDeleteView,
@@ -16,6 +16,7 @@ urlpatterns = [
     path('auth/reset-password/', reset_password, name='reset_password'),
     path('auth/token/refresh/', token_refresh, name='token_refresh'),
     path('auth/me/', ProfileView.as_view(), name='profile'),
+    path('auth/change-password/', ChangePasswordView.as_view(), name='change_password'),
     
     # Quiz (Student)
     path('quizzes/', QuizListView.as_view(), name='quiz_list'),

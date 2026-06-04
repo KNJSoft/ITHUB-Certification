@@ -22,6 +22,7 @@ import { AdminActivity } from './pages/admin/AdminActivity';
 import { AdminSecurity } from './pages/admin/AdminSecurity';
 import { AdminQuizzes } from './pages/admin/AdminQuizzes';
 import { AdminUsers } from './pages/admin/AdminUsers';
+import { AdminProfile } from './pages/admin/AdminProfile';
 import { AdminSettings } from './pages/admin/Settings';
 import { AdminNotFound } from './pages/admin/AdminNotFound';
 
@@ -78,6 +79,7 @@ export default function App() {
           <Route path="security" element={<AdminSecurity />} />
           <Route path="quizzes" element={<AdminQuizzes />} />
           <Route path="users" element={<AdminUsers />} />
+          <Route path="profile" element={<AdminProfile />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="*" element={<AdminNotFound />} />
         </Route>
