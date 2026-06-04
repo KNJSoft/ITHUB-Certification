@@ -120,7 +120,7 @@ export const Login: React.FC<LoginProps> = ({ isAdmin = false }) => {
               <label className="block text-xs sm:text-sm font-medium text-[#94a3b8] mb-1.5 sm:mb-2 px-1">Email Address</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none text-[#64748b] group-focus-within:text-[#2563eb] transition-colors">
-                  <Mail size={16} className="sm:size-18" />
+                  <Mail size={18} className="sm:size-7" />
                 </div>
                 <input
                   type="email"
@@ -137,7 +137,7 @@ export const Login: React.FC<LoginProps> = ({ isAdmin = false }) => {
               <label className="block text-xs sm:text-sm font-medium text-[#94a3b8] mb-1.5 sm:mb-2 px-1">Password</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none text-[#64748b] group-focus-within:text-[#2563eb] transition-colors">
-                  <Lock size={16} className="sm:size-18" />
+                  <Lock size={16} className="sm:size-7" />
                 </div>
                 <input
                   type="password"

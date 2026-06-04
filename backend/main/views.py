@@ -350,6 +350,55 @@ class ProfileView(APIView):
     def get(self, request):
         serializer = UserProfileSerializer(request.user)
         return Response(serializer.data)
+    
+    @extend_schema(
+        request=UserProfileSerializer,
+        responses={200: UserProfileSerializer}
+    )
+    def patch(self, request):
+        serializer = UserProfileSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+
+
+@extend_schema(
+    tags=['Authentication'],
+    summary='Changer le mot de passe',
+    description='Permet à l\'utilisateur connecté de changer son mot de passe',
+    request={
+        'type': 'object',
+        'properties': {
+            'old_password': {'type': 'string'},
+            'new_password': {'type': 'string'},
+            'new_password_confirm': {'type': 'string'}
+        },
+        'required': ['old_password', 'new_password', 'new_password_confirm']
+    },
+    responses={200: {'type': 'object', 'properties': {'success': {'type': 'boolean'}}}}
+)
+class ChangePasswordView(APIView):
+    permission_classes = [IsStudentOrAdmin]
+    
+    def post(self, request):
+        old_password = request.data.get('old_password')
+        new_password = request.data.get('new_password')
+        new_password_confirm = request.data.get('new_password_confirm')
+        
+        if not old_password or not new_password or not new_password_confirm:
+            return Response({'error': 'Tous les champs sont requis'}, status=400)
+        
+        if new_password != new_password_confirm:
+            return Response({'error': 'Les mots de passe ne correspondent pas'}, status=400)
+        
+        if not request.user.check_password(old_password):
+            return Response({'error': 'L\'ancien mot de passe est incorrect'}, status=400)
+        
+        request.user.set_password(new_password)
+        request.user.save()
+        
+        return Response({'success': True})
 
 
 # --- Quiz Views (Student) ---

@@ -272,7 +272,7 @@ export const AdminUsers: React.FC = () => {
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
              <div className="flex items-center gap-2 bg-[#0f172a] border border-[#7c3aed10] px-3 sm:px-5 py-2 sm:py-3 rounded-2xl text-[9px] sm:text-[10px] font-black text-[#64748b] uppercase tracking-widest">
-                <Filter size={12} className="text-[#7c3aed] sm:size-14" />
+                <Filter size={12} className="text-[#7c3aed]" />
                 Filtrer par score
              </div>
           </div>
@@ -314,13 +314,13 @@ export const AdminUsers: React.FC = () => {
                   </td>
                   <td className="px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8 text-center hidden md:table-cell">
                     <div className="flex flex-col items-center gap-1">
-                      <Activity size={12} className="text-[#64748b] sm:size-14" />
+                      <Activity size={12} className="text-[#64748b]" />
                       <span className="text-[10px] sm:text-[11px] font-bold text-[#94a3b8]">{u.created_at ? new Date(u.created_at).toLocaleDateString('fr-FR') : 'N/A'}</span>
                     </div>
                   </td>
                   <td className="px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8 text-center hidden sm:table-cell">
                     <div className="flex flex-col items-center gap-1">
-                      <Award size={12} className="text-[#64748b] sm:size-14" />
+                      <Award size={12} className="text-[#64748b]" />
                       <span className="text-[10px] sm:text-[11px] font-bold text-[#94a3b8]">{u.role}</span>
                     </div>
                   </td>
@@ -330,13 +330,13 @@ export const AdminUsers: React.FC = () => {
                         onClick={() => handleEditUser(u)}
                         className="p-2 sm:p-3 bg-[#0a0f1d] hover:bg-[#7c3aed] text-[#64748b] hover:text-white rounded-xl border border-[#7c3aed10] transition-all shadow-sm"
                       >
-                        <Edit2 size={14} className="sm:size-18" />
+                        <Edit2 size={14} />
                       </button>
                       <button 
                         onClick={() => handleDeleteUser(u.id)}
                         className="p-2 sm:p-3 bg-[#0a0f1d] hover:bg-red-500 text-[#64748b] hover:text-white rounded-xl border border-[#7c3aed10] transition-all shadow-sm"
                       >
-                        <Trash size={14} className="sm:size-18" />
+                        <Trash size={14} />
                       </button>
                     </div>
                   </td>
@@ -354,7 +354,7 @@ export const AdminUsers: React.FC = () => {
                 disabled={!pagination.previous}
                 className="px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 bg-[#0a0f1d] border border-[#7c3aed10] text-[#f8fafc] rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:border-[#7c3aed] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1 sm:gap-2"
               >
-                <ChevronLeft size={12} className="sm:size-14" />
+                <ChevronLeft size={12} />
                 <span className="hidden sm:inline">Précédent</span>
               </button>
               <span className="text-[9px] sm:text-[10px] font-black text-[#64748b] uppercase tracking-widest px-2 sm:px-3">
@@ -366,7 +366,7 @@ export const AdminUsers: React.FC = () => {
                 className="px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 bg-[#0a0f1d] border border-[#7c3aed10] text-[#f8fafc] rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:border-[#7c3aed] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1 sm:gap-2"
               >
                 <span className="hidden sm:inline">Suivant</span>
-                <ChevronRight size={12} className="sm:size-14" />
+                <ChevronRight size={12} />
               </button>
            </div>
         </div>

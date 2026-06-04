@@ -113,7 +113,7 @@ export const QuizPage: React.FC = () => {
           "flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl border font-mono font-black text-base sm:text-lg min-w-[100px] sm:min-w-[120px] justify-center transition-all",
           timeLeft < 60 ? "bg-red-500/10 border-red-500 text-red-500 animate-pulse scale-105" : "bg-[#0f172a] border-[#334155] text-[#2563eb]"
         )}>
-          <Timer size={16} className="sm:size-20" />
+          <Timer size={16} />
           <span>{formatTime(timeLeft)}</span>
         </div>
       </div>
@@ -136,7 +136,7 @@ export const QuizPage: React.FC = () => {
           className="bg-[#1e293b] border border-[#334155] rounded-[1.5rem] sm:rounded-[2rem] md:rounded-[2.5rem] p-6 sm:p-8 md:p-10 flex-1 flex flex-col shadow-xl"
         >
           <div className="flex items-start gap-3 sm:gap-4 mb-6 sm:mb-10">
-             <div className="mt-1 sm:mt-1.5"><Info size={16} className="text-[#2563eb] sm:size-20" /></div>
+             <div className="mt-1 sm:mt-1.5"><Info size={16} className="text-[#2563eb]" /></div>
              <h2 className="text-lg sm:text-xl md:text-2xl font-black leading-snug text-[#f8fafc]">{currentQuestion.text}</h2>
           </div>
           
@@ -178,7 +178,7 @@ export const QuizPage: React.FC = () => {
           onClick={() => setCurrentIdx(prev => prev - 1)}
           className="flex items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-6 md:px-8 py-3 sm:py-4 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-widest text-[#94a3b8] bg-[#1e293b] border border-[#334155] hover:text-[#f8fafc] disabled:opacity-30 transition-all active:scale-95"
         >
-          <ChevronLeft size={16} className="sm:size-20" />
+          <ChevronLeft size={16} />
           <span>Précédent</span>
         </button>
 
@@ -191,7 +191,7 @@ export const QuizPage: React.FC = () => {
                isAnswered ? "bg-[#2563eb] text-white shadow-[#2563eb]/20 hover:bg-[#1d4ed8]" : "bg-[#334155] text-[#64748b] cursor-not-allowed"
             )}
           >
-            <Flag size={16} className="sm:size-20" />
+            <Flag size={16} />
             <span>Terminer le Quiz</span>
           </button>
         ) : (
@@ -204,7 +204,7 @@ export const QuizPage: React.FC = () => {
             )}
           >
             <span>Question Suivante</span>
-            <ChevronRight size={16} className="sm:size-20" />
+            <ChevronRight size={16} />
           </button>
         )}
       </div>

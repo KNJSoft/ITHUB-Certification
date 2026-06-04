@@ -22,6 +22,7 @@ export const AdminLayout: React.FC = () => {
     { name: 'Sécurité', path: '/admin/security', icon: Shield },
     { name: 'Gérer les Quiz', path: '/admin/quizzes', icon: FileText },
     { name: 'Utilisateurs', path: '/admin/users', icon: Users },
+    { name: 'Mon Profil', path: '/admin/profile', icon: User },
     { name: 'Paramètres', path: '/admin/settings', icon: Settings },
   ];
 
@@ -48,7 +49,7 @@ export const AdminLayout: React.FC = () => {
         <div className="p-6 sm:p-8 flex items-center gap-3 justify-between lg:justify-start">
           <div className="flex items-center gap-3">
             <div className="bg-[#7c3aed] p-2 rounded-xl shadow-lg shadow-[#7c3aed]/30">
-              <ShieldCheck size={20} className="text-white sm:size-26" />
+              <ShieldCheck size={20} className="text-white sm:size-7" />
             </div>
             <div>
               <span className="font-black text-xl sm:text-2xl tracking-tighter block leading-none">IT HUB</span>
@@ -80,7 +81,7 @@ export const AdminLayout: React.FC = () => {
             >
               {({ isActive }) => (
                 <>
-                  <item.icon size={18} className={cn(isActive ? 'text-white' : 'group-hover:text-[#7c3aed] sm:size-20')} />
+                  <item.icon size={18} className={cn(isActive ? 'text-white' : 'group-hover:text-[#7c3aed] sm:size-5')} />
                   <span className="font-bold text-xs sm:text-sm tracking-wide">{item.name}</span>
                 </>
               )}
@@ -89,9 +90,9 @@ export const AdminLayout: React.FC = () => {
         </nav>
 
         <div className="p-4 sm:p-6 border-t border-[#7c3aed10]">
-          <div className="bg-[#7c3aed05] p-3 sm:p-4 rounded-2xl border border-[#7c3aed15] mb-4">
+          {/* <div className="bg-[#7c3aed05] p-3 sm:p-4 rounded-2xl border border-[#7c3aed15] mb-4">
              <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-[#7c3aed] flex items-center justify-center font-black text-white shadow-lg text-xs sm:text-sm">
+                <div className="w-8 h-8 sm:w-7 sm:h-7 rounded-lg bg-[#7c3aed] flex items-center justify-center font-black text-white shadow-lg text-xs sm:text-sm">
                   {user?.first_name?.[0]}
                 </div>
                 <div className="overflow-hidden">
@@ -100,15 +101,15 @@ export const AdminLayout: React.FC = () => {
                 </div>
              </div>
              <div className="flex items-center gap-2 text-[9px] sm:text-[10px] text-[#475569] font-mono">
-                <Mail size={10} className="sm:size-12" />
+                <Mail size={10} className="sm:size-5" />
                 <span className="truncate">{user?.email}</span>
              </div>
-          </div>
+          </div> */}
           <button
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-300 font-bold text-[10px] sm:text-xs uppercase tracking-widest"
           >
-            <LogOut size={14} className="sm:size-16" />
+            <LogOut size={14} className="sm:size-5" />
             <span>Sign Out</span>
           </button>
         </div>
@@ -139,10 +140,10 @@ export const AdminLayout: React.FC = () => {
             </div>
             <div className="h-6 sm:h-8 w-px bg-[#7c3aed15] mx-2 sm:mx-4 hidden sm:block" />
             <button
-              onClick={() => setIsProfileModalOpen(true)}
+              onClick={() => navigate('/admin/profile')}
               className="bg-[#7c3aed] hover:bg-[#6d28d9] text-white p-2 rounded-lg shadow-lg shadow-[#7c3aed]/20 transition-all active:scale-95"
             >
-              <User size={18} className="sm:size-20" />
+              <User size={18} />
             </button>
           </div>
         </header>
@@ -160,63 +161,7 @@ export const AdminLayout: React.FC = () => {
       </div>
 
       {/* Modal Profil Admin */}
-      {isProfileModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="bg-[#0a0f1d] border border-[#7c3aed30] w-full max-w-md rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl"
-          >
-            <div className="p-6 sm:p-8 md:p-10 border-b border-[#7c3aed10] flex justify-between items-center bg-gradient-to-r from-[#7c3aed05] to-transparent">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">Profil Admin</h2>
-                <p className="text-[10px] sm:text-xs text-[#64748b] font-medium mt-1 uppercase tracking-widest">Mettez à jour vos informations</p>
-              </div>
-              <button
-                onClick={() => setIsProfileModalOpen(false)}
-                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#7c3aed10] text-[#7c3aed] flex items-center justify-center hover:bg-[#7c3aed] hover:text-white transition-colors"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="p-6 sm:p-8 md:p-10 space-y-4 sm:space-y-6">
-              <div className="flex justify-center mb-4 sm:mb-6">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#7c3aed] flex items-center justify-center font-black text-white text-3xl sm:text-4xl shadow-lg">
-                  {user?.first_name?.[0]}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[9px] sm:text-[10px] font-black text-[#64748b] uppercase tracking-widest ml-1">Nom</label>
-                <input
-                  type="text"
-                  defaultValue={`${user?.first_name} ${user?.last_name}`}
-                  className="w-full bg-[#0f172a] border border-[#7c3aed10] px-4 sm:px-6 py-3 sm:py-4 rounded-2xl text-white font-bold focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40 text-sm sm:text-base"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[9px] sm:text-[10px] font-black text-[#64748b] uppercase tracking-widest ml-1">Email</label>
-                <input
-                  type="email"
-                  defaultValue={user?.email}
-                  className="w-full bg-[#0f172a] border border-[#7c3aed10] px-4 sm:px-6 py-3 sm:py-4 rounded-2xl text-white font-bold focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40 text-sm sm:text-base"
-                />
-              </div>
-
-              <div className="pt-4 sm:pt-6">
-                <button
-                  onClick={() => setIsProfileModalOpen(false)}
-                  className="w-full py-3 sm:py-4 md:py-5 bg-[#7c3aed] text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs shadow-xl shadow-[#7c3aed]/20 hover:bg-[#6d28d9] transition-all active:scale-95"
-                >
-                  Enregistrer
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      )}
+      
     </div>
   );
 };
